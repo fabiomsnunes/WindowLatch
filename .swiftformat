@@ -1,0 +1,17 @@
+--swiftversion 6.0
+--indent 4
+--maxwidth 120
+--commas inline
+--trimwhitespace always
+--header strip
+--exclude .build,DerivedData,WindowLatch.xcodeproj
+
+# `redundantSelf` strips `self.` inside OSLog string interpolations, which the
+# compiler then rejects ("explicit use of 'self' required"). Disable globally
+# rather than fight per-callsite.
+--disable redundantSelf
+
+# `noForceTryInTests` / `noForceUnwrapInTests` rewrite `try!` → `try #require(...)`
+# but produce invalid output (`try try #require(...)`). Tests use `try!` deliberately
+# for test-time setup that must succeed; disable.
+--disable noForceTryInTests,noForceUnwrapInTests

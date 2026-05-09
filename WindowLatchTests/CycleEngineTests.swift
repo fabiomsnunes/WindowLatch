@@ -295,10 +295,10 @@ struct CycleEngineTests {
     @Test
     func allFourDirections_haveSymmetricFirstZones() {
         for (dir, expected): (Direction, Zone) in [
-            (.left,  DefaultLayouts.leftTwoThirds),
+            (.left, DefaultLayouts.leftTwoThirds),
             (.right, DefaultLayouts.rightTwoThirds),
-            (.up,    DefaultLayouts.topTwoThirds),
-            (.down,  DefaultLayouts.bottomTwoThirds),
+            (.up, DefaultLayouts.topTwoThirds),
+            (.down, DefaultLayouts.bottomTwoThirds)
         ] {
             let (action, _) = engine.process(CycleInput(
                 direction: dir,

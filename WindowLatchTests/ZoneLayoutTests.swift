@@ -62,14 +62,14 @@ struct ZoneLayoutTests {
             (1280, 800),
             (1920, 1080),
             (3840, 1600), // ultrawide
-            (5120, 2880), // 5K
+            (5120, 2880) // 5K
         ]
         for (w, h) in resolutions {
             let s = screen(width: w, height: h)
             let rect = WindowMover.computeTargetRect(zone: DefaultLayouts.leftHalf, on: s, gap: 8)
             // width = w/2 - 8 (external) - 4 (inner) = w/2 - 12
             #expect(rect.size.width == w / 2 - 12, "Width mismatch at \(w)x\(h)")
-            #expect(rect.size.height == h - 16,    "Height mismatch at \(w)x\(h)")
+            #expect(rect.size.height == h - 16, "Height mismatch at \(w)x\(h)")
         }
     }
 

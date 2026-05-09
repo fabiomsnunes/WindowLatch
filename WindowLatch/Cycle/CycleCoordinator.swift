@@ -68,9 +68,9 @@ final class CycleCoordinator {
         switch action {
         case .noOp:
             log.debug("noOp for \(direction.rawValue, privacy: .public) (no neighbour or already exhausted)")
-        case .apply(let zone, .current):
+        case let .apply(zone, .current):
             apply(zone: zone, on: currentScreen, window: window)
-        case .apply(let zone, .neighbour):
+        case let .apply(zone, .neighbour):
             if let neighbour {
                 apply(zone: zone, on: neighbour, window: window)
             }
@@ -91,7 +91,8 @@ final class CycleCoordinator {
             if abs(frame.origin.x - target.origin.x) <= tolerance,
                abs(frame.origin.y - target.origin.y) <= tolerance,
                abs(frame.size.width - target.size.width) <= tolerance,
-               abs(frame.size.height - target.size.height) <= tolerance {
+               abs(frame.size.height - target.size.height) <= tolerance
+            {
                 return zone.id
             }
         }
@@ -103,10 +104,10 @@ extension ScreenManager {
     /// Returns the neighbouring screen in `direction`, if any.
     func screen(in direction: Direction, of screen: ScreenInfo) -> ScreenInfo? {
         switch direction {
-        case .left:  return screenLeft(of: screen)
-        case .right: return screenRight(of: screen)
-        case .up:    return screenAbove(of: screen)
-        case .down:  return screenBelow(of: screen)
+        case .left: screenLeft(of: screen)
+        case .right: screenRight(of: screen)
+        case .up: screenAbove(of: screen)
+        case .down: screenBelow(of: screen)
         }
     }
 }

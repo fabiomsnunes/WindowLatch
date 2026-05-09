@@ -18,7 +18,10 @@ enum WindowMover {
             return
         }
         let target = computeTargetRect(zone: zone, on: screen, gap: gap)
-        log.debug("Move to \(zone.id, privacy: .public) on \(screen.name, privacy: .public): target AX \(String(describing: target), privacy: .public)")
+        log
+            .debug(
+                "Move to \(zone.id, privacy: .public) on \(screen.name, privacy: .public): target AX \(String(describing: target), privacy: .public)"
+            )
         AccessibilityClient.setFrame(target, on: window)
     }
 
@@ -38,20 +41,20 @@ enum WindowMover {
         )
 
         // Edge classification — full gap on outer edges, half gap on inner edges between zones.
-        let leftExternal   = zone.rect.minX <= 0.0001
-        let rightExternal  = zone.rect.maxX >= 0.9999
-        let topExternal    = zone.rect.minY <= 0.0001 // top in zone coords = top of screen
+        let leftExternal = zone.rect.minX <= 0.0001
+        let rightExternal = zone.rect.maxX >= 0.9999
+        let topExternal = zone.rect.minY <= 0.0001 // top in zone coords = top of screen
         let bottomExternal = zone.rect.maxY >= 0.9999 // bottom in zone coords = bottom of screen
 
-        let leftGap   = leftExternal   ? gap : gap / 2
-        let rightGap  = rightExternal  ? gap : gap / 2
-        let topGap    = topExternal    ? gap : gap / 2
+        let leftGap = leftExternal ? gap : gap / 2
+        let rightGap = rightExternal ? gap : gap / 2
+        let topGap = topExternal ? gap : gap / 2
         let bottomGap = bottomExternal ? gap : gap / 2
 
         // Apply insets in NSScreen coords (y grows up).
-        rectNS.origin.x   += leftGap
-        rectNS.size.width  -= leftGap + rightGap
-        rectNS.origin.y   += bottomGap
+        rectNS.origin.x += leftGap
+        rectNS.size.width -= leftGap + rightGap
+        rectNS.origin.y += bottomGap
         rectNS.size.height -= topGap + bottomGap
 
         return ScreenManager.shared.toAX(rectNS)

@@ -2,7 +2,7 @@ import AppKit
 import ApplicationServices
 import Observation
 
-struct ScreenInfo: Identifiable, Hashable, Sendable {
+struct ScreenInfo: Identifiable, Hashable {
     let id: CGDirectDisplayID
     /// Full screen frame in NSScreen coordinates (bottom-left origin, primary at (0,0)).
     let frame: CGRect
@@ -94,12 +94,24 @@ final class ScreenManager {
     }
 
     // MARK: - Spatial adjacency (NSScreen coords; y grows up, "above" = higher y)
+
     // Logic lives in `ScreenAdjacency` so it's unit-testable without NSScreen.
 
-    func screenLeft(of screen: ScreenInfo)  -> ScreenInfo? { ScreenAdjacency.screenLeft(of: screen, in: screens) }
-    func screenRight(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenRight(of: screen, in: screens) }
-    func screenAbove(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenAbove(of: screen, in: screens) }
-    func screenBelow(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenBelow(of: screen, in: screens) }
+    func screenLeft(of screen: ScreenInfo) -> ScreenInfo? {
+        ScreenAdjacency.screenLeft(of: screen, in: screens)
+    }
+
+    func screenRight(of screen: ScreenInfo) -> ScreenInfo? {
+        ScreenAdjacency.screenRight(of: screen, in: screens)
+    }
+
+    func screenAbove(of screen: ScreenInfo) -> ScreenInfo? {
+        ScreenAdjacency.screenAbove(of: screen, in: screens)
+    }
+
+    func screenBelow(of screen: ScreenInfo) -> ScreenInfo? {
+        ScreenAdjacency.screenBelow(of: screen, in: screens)
+    }
 }
 
 extension NSScreen {

@@ -3,13 +3,13 @@ import Foundation
 
 // MARK: - Engine I/O types
 
-struct CycleState: Equatable, Sendable {
+struct CycleState: Equatable {
     var lastDirection: Direction?
     var lastZone: Zone?
     var lastTimestamp: Date?
     /// Set when the last action was a cross-monitor jump; consumed by the jump-back branch
     /// when the user immediately presses the opposite direction.
-    var lastJumpDirection: Direction? = nil
+    var lastJumpDirection: Direction?
 
     static let initial = CycleState(
         lastDirection: nil,
@@ -19,7 +19,7 @@ struct CycleState: Equatable, Sendable {
     )
 }
 
-struct CycleInput: Equatable, Sendable {
+struct CycleInput: Equatable {
     let direction: Direction
     /// ID of the zone the focused window currently matches, or nil if it doesn't match any.
     let currentZoneID: String?
@@ -29,12 +29,12 @@ struct CycleInput: Equatable, Sendable {
     let state: CycleState
 }
 
-enum TargetScreen: Equatable, Sendable {
+enum TargetScreen: Equatable {
     case current
     case neighbour
 }
 
-enum CycleAction: Equatable, Sendable {
+enum CycleAction: Equatable {
     case noOp
     case apply(Zone, on: TargetScreen)
 }
@@ -54,7 +54,7 @@ enum CycleAction: Equatable, Sendable {
 /// The window's current zone is always the source of truth — a long pause does NOT
 /// restart the cycle at the largest zone, because that would diverge from what the
 /// user sees on screen.
-nonisolated struct CycleEngine: Sendable {
+nonisolated struct CycleEngine {
     let comboTimeout: TimeInterval
     let resetDelay: TimeInterval
     let comboEnabled: Bool
@@ -84,7 +84,8 @@ nonisolated struct CycleEngine: Sendable {
            let lastDir = input.state.lastDirection,
            let lastZone = input.state.lastZone,
            dt <= comboTimeout,
-           lastDir.axis != input.direction.axis {
+           lastDir.axis != input.direction.axis
+        {
             let comboZone = makeComboZone(from: lastZone, direction: input.direction)
             let newState = CycleState(lastDirection: nil, lastZone: comboZone, lastTimestamp: input.now)
             return (.apply(comboZone, on: .current), newState)
@@ -96,7 +97,8 @@ nonisolated struct CycleEngine: Sendable {
         if let lastJump = input.state.lastJumpDirection,
            input.direction == lastJump.opposite,
            dt <= resetDelay,
-           input.hasNeighbour {
+           input.hasNeighbour
+        {
             let entry = crossMonitorEntry(input.direction)
             let newState = CycleState(
                 lastDirection: input.direction,
@@ -112,7 +114,8 @@ nonisolated struct CycleEngine: Sendable {
         //    rightTwoThirds rather than jumping to a left zone.
         if let lastDir = input.state.lastDirection,
            input.direction == lastDir.opposite,
-           let curID = input.currentZoneID {
+           let curID = input.currentZoneID
+        {
             let lastDirSequence = sequence(lastDir)
             if let idx = lastDirSequence.firstIndex(where: { $0.id == curID }), idx > 0 {
                 let prev = lastDirSequence[idx - 1]
@@ -124,7 +127,8 @@ nonisolated struct CycleEngine: Sendable {
 
         // 3) Cycle continuation — current window matches a zone in this direction's sequence.
         if let curID = input.currentZoneID,
-           let idx = directionSequence.firstIndex(where: { $0.id == curID }) {
+           let idx = directionSequence.firstIndex(where: { $0.id == curID })
+        {
             if idx + 1 < directionSequence.count {
                 let next = directionSequence[idx + 1]
                 let newState = CycleState(lastDirection: input.direction, lastZone: next, lastTimestamp: input.now)
@@ -140,7 +144,11 @@ nonisolated struct CycleEngine: Sendable {
                     )
                     return (.apply(entry, on: .neighbour), newState)
                 } else {
-                    let newState = CycleState(lastDirection: input.direction, lastZone: input.state.lastZone, lastTimestamp: input.now)
+                    let newState = CycleState(
+                        lastDirection: input.direction,
+                        lastZone: input.state.lastZone,
+                        lastTimestamp: input.now
+                    )
                     return (.noOp, newState)
                 }
             }
@@ -157,16 +165,15 @@ nonisolated struct CycleEngine: Sendable {
 
     private func makeComboZone(from base: Zone, direction: Direction) -> Zone {
         let r = base.rect
-        let newRect: CGRect
-        switch direction {
+        let newRect = switch direction {
         case .up:
-            newRect = CGRect(x: r.minX, y: r.minY, width: r.width, height: r.height / 2)
+            CGRect(x: r.minX, y: r.minY, width: r.width, height: r.height / 2)
         case .down:
-            newRect = CGRect(x: r.minX, y: r.minY + r.height / 2, width: r.width, height: r.height / 2)
+            CGRect(x: r.minX, y: r.minY + r.height / 2, width: r.width, height: r.height / 2)
         case .left:
-            newRect = CGRect(x: r.minX, y: r.minY, width: r.width / 2, height: r.height)
+            CGRect(x: r.minX, y: r.minY, width: r.width / 2, height: r.height)
         case .right:
-            newRect = CGRect(x: r.minX + r.width / 2, y: r.minY, width: r.width / 2, height: r.height)
+            CGRect(x: r.minX + r.width / 2, y: r.minY, width: r.width / 2, height: r.height)
         }
         return Zone(
             id: "combo-\(base.id)-\(direction.rawValue)",

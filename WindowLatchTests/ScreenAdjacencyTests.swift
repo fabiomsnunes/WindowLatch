@@ -13,7 +13,7 @@ struct ScreenAdjacencyTests {
 
     @Test
     func horizontalLayout_findsLeftAndRightNeighbours() {
-        let primary   = makeScreen(1, x: 0,    y: 0, w: 1920, h: 1080)
+        let primary = makeScreen(1, x: 0, y: 0, w: 1920, h: 1080)
         let secondary = makeScreen(2, x: 1920, y: 0, w: 1920, h: 1080)
         let screens = [primary, secondary]
 
@@ -30,8 +30,8 @@ struct ScreenAdjacencyTests {
     @Test
     func verticalStack_findsAboveAndBelow() {
         // Primary at (0,0). Secondary above it (NSScreen y grows up).
-        let primary = makeScreen(1, x: 0, y: 0,    w: 1920, h: 1080)
-        let above   = makeScreen(2, x: 0, y: 1080, w: 1920, h: 1080)
+        let primary = makeScreen(1, x: 0, y: 0, w: 1920, h: 1080)
+        let above = makeScreen(2, x: 0, y: 1080, w: 1920, h: 1080)
         let screens = [primary, above]
 
         #expect(ScreenAdjacency.screenAbove(of: primary, in: screens)?.id == 2)
@@ -45,9 +45,9 @@ struct ScreenAdjacencyTests {
     @Test
     func lShape_threeMonitors_resolvesAdjacencyCorrectly() {
         // Primary in centre, secondary to the right, tertiary above primary.
-        let primary   = makeScreen(1, x: 0,    y: 0,    w: 1920, h: 1080)
-        let right     = makeScreen(2, x: 1920, y: 0,    w: 1920, h: 1080)
-        let above     = makeScreen(3, x: 0,    y: 1080, w: 1920, h: 1080)
+        let primary = makeScreen(1, x: 0, y: 0, w: 1920, h: 1080)
+        let right = makeScreen(2, x: 1920, y: 0, w: 1920, h: 1080)
+        let above = makeScreen(3, x: 0, y: 1080, w: 1920, h: 1080)
         let screens = [primary, right, above]
 
         #expect(ScreenAdjacency.screenRight(of: primary, in: screens)?.id == 2)
@@ -65,9 +65,9 @@ struct ScreenAdjacencyTests {
     @Test
     func multipleCandidates_picksNearest() {
         // Primary at (0,0). Two screens to the right with a gap between.
-        let primary = makeScreen(1, x: 0,    y: 0, w: 1000, h: 1000)
-        let near    = makeScreen(2, x: 1000, y: 0, w: 1000, h: 1000)
-        let far     = makeScreen(3, x: 3000, y: 0, w: 1000, h: 1000)
+        let primary = makeScreen(1, x: 0, y: 0, w: 1000, h: 1000)
+        let near = makeScreen(2, x: 1000, y: 0, w: 1000, h: 1000)
+        let far = makeScreen(3, x: 3000, y: 0, w: 1000, h: 1000)
         let screens = [primary, near, far]
 
         #expect(ScreenAdjacency.screenRight(of: primary, in: screens)?.id == 2)
@@ -78,8 +78,8 @@ struct ScreenAdjacencyTests {
     @Test
     func touchingWithSubpixelOverlap_isStillAdjacent() {
         // Some setups report frames overlapping by ~1px due to scale rounding.
-        let primary = makeScreen(1, x: 0,      y: 0, w: 1920, h: 1080)
-        let right   = makeScreen(2, x: 1919.5, y: 0, w: 1920, h: 1080)
+        let primary = makeScreen(1, x: 0, y: 0, w: 1920, h: 1080)
+        let right = makeScreen(2, x: 1919.5, y: 0, w: 1920, h: 1080)
         let screens = [primary, right]
 
         #expect(ScreenAdjacency.screenRight(of: primary, in: screens)?.id == 2)

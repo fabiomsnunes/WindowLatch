@@ -5,12 +5,6 @@ struct SettingsView: View {
     @Bindable var zones: ZoneStore
     @Bindable var screens: ScreenManager
 
-    init(settings: SettingsStore, zones: ZoneStore, screens: ScreenManager) {
-        self.settings = settings
-        self.zones = zones
-        self.screens = screens
-    }
-
     var body: some View {
         Form {
             generalSection
@@ -37,7 +31,7 @@ struct SettingsView: View {
 
             Stepper(
                 value: gapBinding,
-                in: 0...32,
+                in: 0 ... 32,
                 step: 4
             ) {
                 LabeledContent("Window gap") {
@@ -49,7 +43,7 @@ struct SettingsView: View {
 
             Stepper(
                 value: $settings.cycleResetDelay,
-                in: 0.5...5.0,
+                in: 0.5 ... 5.0,
                 step: 0.5
             ) {
                 LabeledContent("Cycle reset delay") {
@@ -87,9 +81,11 @@ struct SettingsView: View {
         } header: {
             Text("Zones per monitor")
         } footer: {
-            Text("Enable the zone groups you want to cycle through on each monitor. Quarters are only reachable via a cross-axis combo (e.g. Left then Up).")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            Text(
+                "Enable the zone groups you want to cycle through on each monitor. Quarters are only reachable via a cross-axis combo (e.g. Left then Up)."
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
         }
     }
 
@@ -143,7 +139,10 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                     HStack(spacing: 12) {
                         Link("GitHub", destination: URL(string: "https://github.com/fabiomsnunes/WindowLatch")!)
-                        Link("Report an issue", destination: URL(string: "https://github.com/fabiomsnunes/WindowLatch/issues")!)
+                        Link(
+                            "Report an issue",
+                            destination: URL(string: "https://github.com/fabiomsnunes/WindowLatch/issues")!
+                        )
                     }
                     .font(.callout)
                     .padding(.top, 4)

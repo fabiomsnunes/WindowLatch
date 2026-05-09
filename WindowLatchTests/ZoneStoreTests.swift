@@ -93,7 +93,7 @@ struct ZoneStoreTests {
 
         store.setGroup(.quarters, enabled: false, for: 1) // change → notify
         store.setGroup(.quarters, enabled: false, for: 1) // no-op, no notify
-        store.setGroup(.quarters, enabled: true, for: 1)  // change → notify
+        store.setGroup(.quarters, enabled: true, for: 1) // change → notify
 
         #expect(fired == 2)
     }

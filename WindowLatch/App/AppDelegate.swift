@@ -12,7 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let cycleCoordinator = CycleCoordinator(settings: .shared, zones: .shared)
     let permissions = PermissionsManager()
 
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_: Notification) {
         NSApp.setActivationPolicy(.accessory)
 
         setupStatusItem()
@@ -31,10 +31,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func applyShortcutModifier(_ modifier: ShortcutModifier) {
         let mods = modifier.nsFlags
-        KeyboardShortcuts.setShortcut(.init(.leftArrow,  modifiers: mods), for: .cycleLeft)
+        KeyboardShortcuts.setShortcut(.init(.leftArrow, modifiers: mods), for: .cycleLeft)
         KeyboardShortcuts.setShortcut(.init(.rightArrow, modifiers: mods), for: .cycleRight)
-        KeyboardShortcuts.setShortcut(.init(.upArrow,    modifiers: mods), for: .cycleUp)
-        KeyboardShortcuts.setShortcut(.init(.downArrow,  modifiers: mods), for: .cycleDown)
+        KeyboardShortcuts.setShortcut(.init(.upArrow, modifiers: mods), for: .cycleUp)
+        KeyboardShortcuts.setShortcut(.init(.downArrow, modifiers: mods), for: .cycleDown)
         log.info("Cycle shortcuts bound to \(modifier.rawValue, privacy: .public) + arrows")
     }
 
@@ -59,7 +59,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Global shortcuts
 
     private func setupShortcuts() {
-        KeyboardShortcuts.onKeyDown(for: .cycleLeft)  { [weak self] in
+        KeyboardShortcuts.onKeyDown(for: .cycleLeft) { [weak self] in
             log.info("cycleLeft fired")
             self?.cycleCoordinator.handle(.left)
         }
@@ -67,11 +67,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             log.info("cycleRight fired")
             self?.cycleCoordinator.handle(.right)
         }
-        KeyboardShortcuts.onKeyDown(for: .cycleUp)    { [weak self] in
+        KeyboardShortcuts.onKeyDown(for: .cycleUp) { [weak self] in
             log.info("cycleUp fired")
             self?.cycleCoordinator.handle(.up)
         }
-        KeyboardShortcuts.onKeyDown(for: .cycleDown)  { [weak self] in
+        KeyboardShortcuts.onKeyDown(for: .cycleDown) { [weak self] in
             log.info("cycleDown fired")
             self?.cycleCoordinator.handle(.down)
         }
@@ -148,7 +148,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Menu actions
 
-    @objc private func openSettings(_ sender: Any?) {
+    @objc private func openSettings(_: Any?) {
         let controller = settingsController ?? SettingsWindowController(
             settings: .shared,
             zones: .shared,

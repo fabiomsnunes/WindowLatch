@@ -26,7 +26,7 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) is not supported")
     }
 
@@ -41,7 +41,7 @@ final class OnboardingWindowController: NSWindowController, NSWindowDelegate {
         window?.orderOut(nil)
     }
 
-    func windowWillClose(_ notification: Notification) {
+    func windowWillClose(_: Notification) {
         permissions.stopPolling()
     }
 }

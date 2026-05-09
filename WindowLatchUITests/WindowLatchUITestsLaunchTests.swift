@@ -1,14 +1,6 @@
-//
-//  WindowLatchUITestsLaunchTests.swift
-//  WindowLatchUITests
-//
-//  Created by Fábio Nunes on 07/05/2026.
-//
-
 import XCTest
 
 final class WindowLatchUITestsLaunchTests: XCTestCase {
-
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }
@@ -18,7 +10,7 @@ final class WindowLatchUITestsLaunchTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunch() throws {
+    func testLaunch() {
         let app = XCUIApplication()
         app.launch()
 

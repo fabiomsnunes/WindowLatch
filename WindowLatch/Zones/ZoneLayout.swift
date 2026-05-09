@@ -1,4 +1,4 @@
-struct ZoneLayout: Identifiable, Hashable, Sendable {
+struct ZoneLayout: Identifiable, Hashable {
     let id: String
     let label: String
     let zones: [Zone]

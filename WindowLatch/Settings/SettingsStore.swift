@@ -61,7 +61,8 @@ final class SettingsStore {
             self.cycleResetDelay = Defaults.cycleResetDelay
         }
         if let raw = defaults.string(forKey: Key.modifier),
-           let m = ShortcutModifier(rawValue: raw) {
+           let m = ShortcutModifier(rawValue: raw)
+        {
             self.modifier = m
         } else {
             self.modifier = Defaults.modifier

@@ -4,13 +4,13 @@ nonisolated enum CycleDefinition {
     static func sequence(for direction: Direction) -> [Zone] {
         switch direction {
         case .left:
-            return [DefaultLayouts.leftTwoThirds, DefaultLayouts.leftHalf, DefaultLayouts.leftThird]
+            [DefaultLayouts.leftTwoThirds, DefaultLayouts.leftHalf, DefaultLayouts.leftThird]
         case .right:
-            return [DefaultLayouts.rightTwoThirds, DefaultLayouts.rightHalf, DefaultLayouts.rightThird]
+            [DefaultLayouts.rightTwoThirds, DefaultLayouts.rightHalf, DefaultLayouts.rightThird]
         case .up:
-            return [DefaultLayouts.topTwoThirds, DefaultLayouts.topHalf, DefaultLayouts.topThird]
+            [DefaultLayouts.topTwoThirds, DefaultLayouts.topHalf, DefaultLayouts.topThird]
         case .down:
-            return [DefaultLayouts.bottomTwoThirds, DefaultLayouts.bottomHalf, DefaultLayouts.bottomThird]
+            [DefaultLayouts.bottomTwoThirds, DefaultLayouts.bottomHalf, DefaultLayouts.bottomThird]
         }
     }
 
@@ -18,10 +18,10 @@ nonisolated enum CycleDefinition {
     /// Coming from `.left` exhaustion lands on right-half of the screen to the left, etc.
     static func crossMonitorEntry(for direction: Direction) -> Zone {
         switch direction {
-        case .left:  return DefaultLayouts.rightHalf
-        case .right: return DefaultLayouts.leftHalf
-        case .up:    return DefaultLayouts.bottomHalf
-        case .down:  return DefaultLayouts.topHalf
+        case .left: DefaultLayouts.rightHalf
+        case .right: DefaultLayouts.leftHalf
+        case .up: DefaultLayouts.bottomHalf
+        case .down: DefaultLayouts.topHalf
         }
     }
 }

@@ -16,7 +16,7 @@ struct OnboardingView: View {
                     .fontWeight(.semibold)
                 Text(
                     "WindowLatch needs Accessibility access to move and resize your windows. "
-                    + "macOS requires this for any tool that controls other apps' windows."
+                        + "macOS requires this for any tool that controls other apps' windows."
                 )
                 .font(.body)
                 .foregroundStyle(.secondary)
@@ -27,7 +27,7 @@ struct OnboardingView: View {
 
             Text(
                 "If the status doesn't update within a few seconds after granting permission, "
-                + "quit and reopen WindowLatch."
+                    + "quit and reopen WindowLatch."
             )
             .font(.footnote)
             .foregroundStyle(.tertiary)
