@@ -2,9 +2,9 @@ import AppKit
 import SwiftUI
 
 final class SettingsWindowController: NSWindowController {
-    init() {
+    init(settings: SettingsStore) {
         let hostingController = NSHostingController(
-            rootView: SettingsPlaceholderView()
+            rootView: SettingsView(settings: settings)
         )
 
         let window = NSWindow(contentViewController: hostingController)
@@ -25,22 +25,5 @@ final class SettingsWindowController: NSWindowController {
         NSApp.activate(ignoringOtherApps: true)
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
-    }
-}
-
-private struct SettingsPlaceholderView: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "gearshape")
-                .font(.system(size: 48, weight: .light))
-                .foregroundStyle(.secondary)
-            Text("Settings — coming soon")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-            Text("General, Shortcuts, Monitors and About will live here.")
-                .font(.callout)
-                .foregroundStyle(.tertiary)
-        }
-        .frame(width: 480, height: 320)
     }
 }

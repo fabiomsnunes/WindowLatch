@@ -14,7 +14,7 @@ final class CycleCoordinator {
     private var state: CycleState = .initial
     private let settings: SettingsStore
 
-    init(settings: SettingsStore = .shared) {
+    init(settings: SettingsStore) {
         self.settings = settings
         self.gap = settings.gap
         self.engine = CycleEngine(resetDelay: settings.cycleResetDelay)

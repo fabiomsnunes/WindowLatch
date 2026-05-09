@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var onboardingController: OnboardingWindowController?
     private var settingsController: SettingsWindowController?
-    private let cycleCoordinator = CycleCoordinator()
+    private let cycleCoordinator = CycleCoordinator(settings: .shared)
     let permissions = PermissionsManager()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -136,7 +136,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Menu actions
 
     @objc private func openSettings(_ sender: Any?) {
-        let controller = settingsController ?? SettingsWindowController()
+        let controller = settingsController ?? SettingsWindowController(settings: .shared)
         settingsController = controller
         controller.show()
     }
