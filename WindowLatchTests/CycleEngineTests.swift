@@ -116,7 +116,10 @@ struct CycleEngineTests {
     }
 
     @Test
-    func sameAxisPress_doesNotTriggerCombo() {
+    func sameAxisOppositePress_isReverseCycleNotCombo() {
+        // Same axis (horizontal) is never a combo regardless of timing. Behaviour falls
+        // through to the reverse-cycle branch: window in left-half, lastDir=.left,
+        // pressing right steps back through left's sequence to leftTwoThirds.
         let state = CycleState(lastDirection: .left, lastZone: DefaultLayouts.leftHalf, lastTimestamp: t0)
         let (action, _) = engine.process(CycleInput(
             direction: .right,
@@ -125,7 +128,41 @@ struct CycleEngineTests {
             hasNeighbour: false,
             state: state
         ))
+        #expect(action == .apply(DefaultLayouts.leftTwoThirds, on: .current))
+    }
+
+    // MARK: - Reverse cycle
+
+    @Test
+    func oppositePress_undoesLastStep() {
+        // After cycling right twice, window is in right-half (rightTwoThirds → rightHalf).
+        // Pressing left should return to rightTwoThirds, not jump to a left zone.
+        let state = CycleState(lastDirection: .right, lastZone: DefaultLayouts.rightHalf, lastTimestamp: t0)
+        let (action, newState) = engine.process(CycleInput(
+            direction: .left,
+            currentZoneID: "right-half",
+            now: t0.addingTimeInterval(0.3),
+            hasNeighbour: false,
+            state: state
+        ))
         #expect(action == .apply(DefaultLayouts.rightTwoThirds, on: .current))
+        // lastDirection stays as .right so successive ← presses keep stepping back.
+        #expect(newState.lastDirection == .right)
+    }
+
+    @Test
+    func oppositePress_atFirstZoneOfLastSequence_fallsThrough() {
+        // Window already at rightTwoThirds (idx 0 of right-sequence). Pressing left has
+        // nothing to undo → falls through to default (leftTwoThirds).
+        let state = CycleState(lastDirection: .right, lastZone: DefaultLayouts.rightTwoThirds, lastTimestamp: t0)
+        let (action, _) = engine.process(CycleInput(
+            direction: .left,
+            currentZoneID: "right-two-thirds",
+            now: t0.addingTimeInterval(0.3),
+            hasNeighbour: false,
+            state: state
+        ))
+        #expect(action == .apply(DefaultLayouts.leftTwoThirds, on: .current))
     }
 
     // MARK: - Long pause continuation (no aggressive reset)

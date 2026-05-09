@@ -37,9 +37,10 @@ enum CycleAction: Equatable, Sendable {
 ///
 /// State machine summary (Δt = now − state.lastTimestamp):
 ///
-///     1. axis crosses && Δt ≤ comboTimeout → apply combo intersection on current
-///     2. currentZoneID is in sequence      → next zone (or cross-monitor on tail)
-///     3. otherwise                         → apply first zone of sequence
+///     1. axis crosses && Δt ≤ comboTimeout                          → apply combo intersection on current
+///     2. opposite of lastDirection && current in lastDir's sequence → step BACK in lastDir's sequence
+///     3. currentZoneID is in sequence                               → next zone (or cross-monitor on tail)
+///     4. otherwise                                                  → apply first zone of sequence
 ///
 /// The window's current zone is always the source of truth — a long pause does NOT
 /// restart the cycle at the largest zone, because that would diverge from what the
@@ -76,7 +77,22 @@ nonisolated struct CycleEngine: Sendable {
             return (.apply(comboZone, on: .current), newState)
         }
 
-        // 2) Cycle continuation — current window matches a zone in this direction's sequence.
+        // 2) Reverse cycle — pressing the opposite of the last direction undoes the last step.
+        //    Concretely: after → → (window now in right-half), pressing ← returns to
+        //    rightTwoThirds rather than jumping to a left zone.
+        if let lastDir = input.state.lastDirection,
+           input.direction == lastDir.opposite,
+           let curID = input.currentZoneID {
+            let lastDirSequence = sequence(lastDir)
+            if let idx = lastDirSequence.firstIndex(where: { $0.id == curID }), idx > 0 {
+                let prev = lastDirSequence[idx - 1]
+                // Keep lastDirection as lastDir so successive opposite presses keep stepping back.
+                let newState = CycleState(lastDirection: lastDir, lastZone: prev, lastTimestamp: input.now)
+                return (.apply(prev, on: .current), newState)
+            }
+        }
+
+        // 3) Cycle continuation — current window matches a zone in this direction's sequence.
         if let curID = input.currentZoneID,
            let idx = directionSequence.firstIndex(where: { $0.id == curID }) {
             if idx + 1 < directionSequence.count {
@@ -95,7 +111,7 @@ nonisolated struct CycleEngine: Sendable {
             }
         }
 
-        // 3) Default — start sequence.
+        // 4) Default — start sequence.
         let first = directionSequence[0]
         let newState = CycleState(lastDirection: input.direction, lastZone: first, lastTimestamp: input.now)
         return (.apply(first, on: .current), newState)
