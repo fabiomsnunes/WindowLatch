@@ -93,9 +93,7 @@ final class ScreenManager {
         return screens.first(where: { $0.frame.contains(cursor) })
     }
 
-    // MARK: - Spatial adjacency (NSScreen coords; y grows up, "above" = higher y)
-
-    // Logic lives in `ScreenAdjacency` so it's unit-testable without NSScreen.
+    // MARK: - Spatial adjacency
 
     func screenLeft(of screen: ScreenInfo) -> ScreenInfo? {
         ScreenAdjacency.screenLeft(of: screen, in: screens)

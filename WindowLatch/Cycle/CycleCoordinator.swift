@@ -28,17 +28,16 @@ final class CycleCoordinator {
     }
 
     func handle(_ direction: Direction) {
-        log.info("handle(\(direction.rawValue, privacy: .public)) entered")
         guard let window = AccessibilityClient.focusedWindow() else {
-            log.info("No focused window — ignoring \(direction.rawValue, privacy: .public)")
+            log.debug("No focused window — ignoring \(direction.rawValue, privacy: .public)")
             return
         }
         guard let frame = AccessibilityClient.frame(of: window) else {
-            log.info("Could not read frame of focused window")
+            log.debug("Could not read frame of focused window")
             return
         }
         guard let currentScreen = ScreenManager.shared.screen(forFocusedWindow: window) else {
-            log.info("Could not determine current screen")
+            log.debug("Could not determine current screen")
             return
         }
 

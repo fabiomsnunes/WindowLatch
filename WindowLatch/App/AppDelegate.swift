@@ -1,9 +1,6 @@
 import AppKit
 import KeyboardShortcuts
-import OSLog
 import SwiftUI
-
-private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "startup")
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
@@ -22,7 +19,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SettingsStore.shared.addObserver { [weak self] in
             self?.applyShortcutModifier(SettingsStore.shared.modifier)
         }
-        logStartupDiagnostics()
 
         if !permissions.isTrusted {
             showOnboarding()
@@ -35,47 +31,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         KeyboardShortcuts.setShortcut(.init(.rightArrow, modifiers: mods), for: .cycleRight)
         KeyboardShortcuts.setShortcut(.init(.upArrow, modifiers: mods), for: .cycleUp)
         KeyboardShortcuts.setShortcut(.init(.downArrow, modifiers: mods), for: .cycleDown)
-        log.info("Cycle shortcuts bound to \(modifier.rawValue, privacy: .public) + arrows")
-    }
-
-    private func logStartupDiagnostics() {
-        log.info("WindowLatch starting; AX trusted=\(self.permissions.isTrusted, privacy: .public)")
-        for (i, screen) in NSScreen.screens.enumerated() {
-            let id = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? 0
-            let f = screen.frame
-            let v = screen.visibleFrame
-            log.info(
-                """
-                screen[\(i, privacy: .public)] id=\(id, privacy: .public) \
-                frame=(\(f.minX, privacy: .public),\(f.minY, privacy: .public) \
-                \(f.width, privacy: .public)x\(f.height, privacy: .public)) \
-                visible=(\(v.minX, privacy: .public),\(v.minY, privacy: .public) \
-                \(v.width, privacy: .public)x\(v.height, privacy: .public))
-                """
-            )
-        }
     }
 
     // MARK: - Global shortcuts
 
     private func setupShortcuts() {
         KeyboardShortcuts.onKeyDown(for: .cycleLeft) { [weak self] in
-            log.info("cycleLeft fired")
             self?.cycleCoordinator.handle(.left)
         }
         KeyboardShortcuts.onKeyDown(for: .cycleRight) { [weak self] in
-            log.info("cycleRight fired")
             self?.cycleCoordinator.handle(.right)
         }
         KeyboardShortcuts.onKeyDown(for: .cycleUp) { [weak self] in
-            log.info("cycleUp fired")
             self?.cycleCoordinator.handle(.up)
         }
         KeyboardShortcuts.onKeyDown(for: .cycleDown) { [weak self] in
-            log.info("cycleDown fired")
             self?.cycleCoordinator.handle(.down)
         }
-        log.info("Shortcuts registered: cycleLeft/Right/Up/Down")
     }
 
     // MARK: - Status item

@@ -125,7 +125,7 @@ nonisolated struct CycleEngine {
             }
         }
 
-        // 3) Cycle continuation — current window matches a zone in this direction's sequence.
+        // 4) Cycle continuation — current window matches a zone in this direction's sequence.
         if let curID = input.currentZoneID,
            let idx = directionSequence.firstIndex(where: { $0.id == curID })
         {
@@ -154,7 +154,7 @@ nonisolated struct CycleEngine {
             }
         }
 
-        // 4) Default — start sequence. If the user disabled every group on this axis,
+        // 5) Default — start sequence. If the user disabled every group on this axis,
         // the sequence is empty and there's nothing to do.
         guard let first = directionSequence.first else {
             return (.noOp, input.state)

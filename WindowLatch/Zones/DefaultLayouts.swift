@@ -78,31 +78,6 @@ nonisolated enum DefaultLayouts {
         rect: CGRect(x: 0.5, y: 0.5, width: 0.5, height: 0.5)
     )
 
-    // MARK: - Misc
-
-    static let maximize = Zone(id: "maximize", label: "Maximize", rect: CGRect(x: 0, y: 0, width: 1, height: 1))
-
-    // MARK: - Layouts (groupings shown in Settings UI in PRD-5)
-
-    static let halves = ZoneLayout(
-        id: "halves",
-        label: "Halves",
-        zones: [leftHalf, rightHalf, topHalf, bottomHalf]
-    )
-
-    static let thirds = ZoneLayout(
-        id: "thirds",
-        label: "Thirds",
-        zones: [leftThird, leftTwoThirds, rightThird, rightTwoThirds,
-                topThird, topTwoThirds, bottomThird, bottomTwoThirds]
-    )
-
-    static let quadrants = ZoneLayout(
-        id: "quadrants",
-        label: "Quadrants",
-        zones: [topLeftQuadrant, topRightQuadrant, bottomLeftQuadrant, bottomRightQuadrant]
-    )
-
     /// All zones the cycle engine may match against (everything reachable from cycle sequences).
     static let allCycleZones: [Zone] = [
         leftHalf, rightHalf, topHalf, bottomHalf,

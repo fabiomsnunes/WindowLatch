@@ -52,8 +52,8 @@ final class PermissionsManager {
 
     func recheck() {
         let trusted = AXIsProcessTrustedWithOptions(nil)
-        log.info("recheck: trusted=\(trusted, privacy: .public) (was \(self.isTrusted, privacy: .public))")
         guard trusted != isTrusted else { return }
+        log.info("Accessibility trust changed: \(trusted, privacy: .public)")
         isTrusted = trusted
         onChange?(trusted)
     }
@@ -65,7 +65,6 @@ final class PermissionsManager {
     func requestAccessWithPrompt() {
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        log.info("requestAccessWithPrompt: trusted=\(trusted, privacy: .public)")
         if trusted != isTrusted {
             isTrusted = trusted
             onChange?(trusted)
