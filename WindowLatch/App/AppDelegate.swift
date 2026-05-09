@@ -107,16 +107,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
-        let aboutItem = NSMenuItem(
-            title: "About WindowLatch",
-            action: #selector(showAbout(_:)),
-            keyEquivalent: ""
-        )
-        aboutItem.target = self
-        menu.addItem(aboutItem)
-
-        menu.addItem(.separator())
-
         let quitItem = NSMenuItem(
             title: "Quit WindowLatch",
             action: #selector(NSApplication.terminate(_:)),
@@ -156,10 +146,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         settingsController = controller
         controller.show()
-    }
-
-    @objc private func showAbout(_ sender: Any?) {
-        NSApp.activate(ignoringOtherApps: true)
-        NSApp.orderFrontStandardAboutPanel(sender)
     }
 }
