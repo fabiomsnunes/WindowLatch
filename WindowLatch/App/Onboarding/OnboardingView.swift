@@ -41,7 +41,10 @@ struct OnboardingView: View {
                 Spacer()
                 Button(action: openSystemSettings) {
                     Text("Open System Settings")
-                        .frame(minWidth: 160)
+                }
+                Button(action: requestAccess) {
+                    Text("Grant Access…")
+                        .frame(minWidth: 140)
                 }
                 .keyboardShortcut(.defaultAction)
                 .buttonStyle(.borderedProminent)
@@ -67,5 +70,9 @@ struct OnboardingView: View {
 
     private func openSystemSettings() {
         NSWorkspace.shared.open(Self.accessibilityPaneURL)
+    }
+
+    private func requestAccess() {
+        permissions.requestAccessWithPrompt()
     }
 }

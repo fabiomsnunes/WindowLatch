@@ -46,10 +46,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Global shortcuts
 
     private func setupShortcuts() {
-        KeyboardShortcuts.onKeyDown(for: .cycleLeft)  { [weak self] in self?.cycleCoordinator.handle(.left) }
-        KeyboardShortcuts.onKeyDown(for: .cycleRight) { [weak self] in self?.cycleCoordinator.handle(.right) }
-        KeyboardShortcuts.onKeyDown(for: .cycleUp)    { [weak self] in self?.cycleCoordinator.handle(.up) }
-        KeyboardShortcuts.onKeyDown(for: .cycleDown)  { [weak self] in self?.cycleCoordinator.handle(.down) }
+        KeyboardShortcuts.onKeyDown(for: .cycleLeft)  { [weak self] in
+            log.info("cycleLeft fired")
+            self?.cycleCoordinator.handle(.left)
+        }
+        KeyboardShortcuts.onKeyDown(for: .cycleRight) { [weak self] in
+            log.info("cycleRight fired")
+            self?.cycleCoordinator.handle(.right)
+        }
+        KeyboardShortcuts.onKeyDown(for: .cycleUp)    { [weak self] in
+            log.info("cycleUp fired")
+            self?.cycleCoordinator.handle(.up)
+        }
+        KeyboardShortcuts.onKeyDown(for: .cycleDown)  { [weak self] in
+            log.info("cycleDown fired")
+            self?.cycleCoordinator.handle(.down)
+        }
+        log.info("Shortcuts registered: cycleLeft/Right/Up/Down")
     }
 
     // MARK: - Status item

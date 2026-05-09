@@ -1,6 +1,9 @@
 import AppKit
 import ApplicationServices
 import Observation
+import OSLog
+
+private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "permissions")
 
 @Observable
 final class PermissionsManager {
@@ -9,11 +12,25 @@ final class PermissionsManager {
 
     @ObservationIgnored private var pollTimer: Timer?
     @ObservationIgnored private var activateObserver: NSObjectProtocol?
+    @ObservationIgnored private var distributedObserver: NSObjectProtocol?
 
     init() {
         recheck()
         activateObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.recheck()
+            }
+        }
+        // macOS posts this distributed notification when the AX TCC database changes,
+        // i.e. the user grants or revokes accessibility from System Settings. Subscribing
+        // to it is more reliable than relying on didBecomeActive (which doesn't fire if
+        // the user grants permission and the app is already active).
+        distributedObserver = DistributedNotificationCenter.default().addObserver(
+            forName: Notification.Name("com.apple.accessibility.api"),
             object: nil,
             queue: .main
         ) { [weak self] _ in
@@ -27,14 +44,32 @@ final class PermissionsManager {
         if let activateObserver {
             NotificationCenter.default.removeObserver(activateObserver)
         }
+        if let distributedObserver {
+            DistributedNotificationCenter.default().removeObserver(distributedObserver)
+        }
         pollTimer?.invalidate()
     }
 
     func recheck() {
         let trusted = AXIsProcessTrustedWithOptions(nil)
+        log.info("recheck: trusted=\(trusted, privacy: .public) (was \(self.isTrusted, privacy: .public))")
         guard trusted != isTrusted else { return }
         isTrusted = trusted
         onChange?(trusted)
+    }
+
+    /// Triggers the native macOS prompt asking the user to grant Accessibility. This also
+    /// adds an entry to the TCC database keyed to the current binary's signature, which is
+    /// essential when the app has been re-signed (e.g. after switching from ad-hoc to a
+    /// development team) and stale entries don't match.
+    func requestAccessWithPrompt() {
+        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
+        log.info("requestAccessWithPrompt: trusted=\(trusted, privacy: .public)")
+        if trusted != isTrusted {
+            isTrusted = trusted
+            onChange?(trusted)
+        }
     }
 
     func startPolling() {

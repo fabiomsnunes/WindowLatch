@@ -19,6 +19,7 @@ final class CycleCoordinator {
     }
 
     func handle(_ direction: Direction) {
+        log.info("handle(\(direction.rawValue, privacy: .public)) entered")
         guard let window = AccessibilityClient.focusedWindow() else {
             log.info("No focused window — ignoring \(direction.rawValue, privacy: .public)")
             return
