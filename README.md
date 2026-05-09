@@ -34,7 +34,7 @@ The modifier is reconfigurable in Settings; the arrow keys are fixed.
 
 1. Download the latest `WindowLatch-vX.Y.Z.dmg` from [Releases](https://github.com/fabiomsnunes/WindowLatch/releases).
 2. Open the .dmg and drag **WindowLatch** to `/Applications`.
-3. First launch: right-click the app → **Open** (the build is ad-hoc signed, so Gatekeeper will warn the first time).
+3. First launch: double-click WindowLatch. Gatekeeper will block it (the build is ad-hoc signed, not notarised). Open **System Settings → Privacy & Security**, scroll to the "WindowLatch was blocked…" notice and click **Open Anyway**, then confirm in the dialog.
 4. Grant **Accessibility** when prompted (see below).
 
 ### Build from source
@@ -46,7 +46,7 @@ open WindowLatch.xcodeproj
 # ⌘R in Xcode
 ```
 
-Requires Xcode 16 or later, macOS 26 (Tahoe) target.
+Requires Xcode 16 or later. The deployment target is **macOS 26 (Tahoe)** — earlier macOS versions are not supported.
 
 ## Accessibility permission
 
@@ -65,6 +65,10 @@ The app polls the TCC database and detects the change automatically — no resta
 - Pure `CycleEngine` state machine — fully unit-tested, no AX or `Date.now` dependency
 - `ScreenAdjacency` is a pure helper — also unit-tested
 - Hybrid persistence: UserDefaults (gap, delay, modifier) + JSON (per-monitor zone groups)
+
+## Roadmap
+
+- **Drag & snap with zone overlay** *(next)* — hold a modifier key while dragging a window to reveal a FancyZones-style overlay highlighting the available zones; release to snap. Requires an additional Input Monitoring permission.
 
 ## Limitations
 
