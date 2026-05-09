@@ -85,7 +85,7 @@ swiftformat .
 xcodebuild test -scheme WindowLatch -destination 'platform=macOS' -only-testing:WindowLatchTests
 ```
 
-CI runs SwiftFormat lint on every PR; the release workflow runs the test suite when you push a `v*` tag.
+CI runs SwiftFormat lint on every PR. Tests must pass locally before cutting a release tag.
 
 ## License
 

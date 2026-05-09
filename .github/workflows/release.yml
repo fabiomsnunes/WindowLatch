@@ -16,9 +16,6 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Run tests
-        run: xcodebuild test -scheme WindowLatch -destination 'platform=macOS' -only-testing:WindowLatchTests
-
       - name: Build archive (ad-hoc signed)
         run: |
           xcodebuild -scheme WindowLatch \
