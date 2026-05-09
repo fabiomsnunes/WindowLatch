@@ -68,7 +68,7 @@ The app polls the TCC database and detects the change automatically — no resta
 
 ## Roadmap
 
-- **Drag & snap with zone overlay** *(next)* — hold a modifier key while dragging a window to reveal a FancyZones-style overlay highlighting the available zones; release to snap. Requires an additional Input Monitoring permission.
+- **Drag & snap with zone overlay** *(next)* — hold a modifier key while dragging a window to reveal a FancyZones-style overlay highlighting the available zones; release to snap.
 
 ## Limitations
 
