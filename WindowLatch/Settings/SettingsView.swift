@@ -15,9 +15,10 @@ struct SettingsView: View {
         Form {
             generalSection
             zonesSection
+            aboutSection
         }
         .formStyle(.grouped)
-        .frame(width: 540, height: 540)
+        .frame(width: 540, height: 620)
     }
 
     // MARK: - General
@@ -120,5 +121,43 @@ struct SettingsView: View {
             get: { zones.enabledGroups(for: displayID).contains(group) },
             set: { zones.setGroup(group, enabled: $0, for: displayID) }
         )
+    }
+
+    // MARK: - About
+
+    private var aboutSection: some View {
+        Section("About") {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: "rectangle.split.2x2")
+                    .font(.system(size: 36, weight: .light))
+                    .foregroundStyle(.tint)
+                    .frame(width: 44)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("WindowLatch")
+                        .font(.headline)
+                    Text("Version \(Self.appVersion)")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                    Text("by Fábio Nunes")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        Link("GitHub", destination: URL(string: "https://github.com/fabiomsnunes/WindowLatch")!)
+                        Link("Report an issue", destination: URL(string: "https://github.com/fabiomsnunes/WindowLatch/issues")!)
+                    }
+                    .font(.callout)
+                    .padding(.top, 4)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+
+    private static var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "0.0"
+        let build = info?["CFBundleVersion"] as? String ?? "0"
+        return "\(short) (\(build))"
     }
 }
