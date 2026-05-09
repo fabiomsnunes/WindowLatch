@@ -77,46 +77,29 @@ final class ScreenManager {
         return screens.first(where: { $0.frame.contains(nsPt) })
     }
 
-    /// Returns the screen the focused window's center sits in. Falls back to primary.
+    /// Returns the screen the focused window's center sits in. Falls back to the
+    /// screen under the cursor, then to primary.
     func screen(forFocusedWindow window: AXUIElement) -> ScreenInfo? {
-        guard let frame = AccessibilityClient.frame(of: window) else { return primary }
-        let mid = CGPoint(x: frame.midX, y: frame.midY) // AX coords
-        return screen(containingAXPoint: mid) ?? primary
+        if let frame = AccessibilityClient.frame(of: window) {
+            let mid = CGPoint(x: frame.midX, y: frame.midY) // AX coords
+            if let s = screen(containingAXPoint: mid) { return s }
+        }
+        return screenUnderCursor() ?? primary
+    }
+
+    /// Returns the screen containing the current mouse cursor, if any.
+    func screenUnderCursor() -> ScreenInfo? {
+        let cursor = NSEvent.mouseLocation // NSScreen coords (bottom-left)
+        return screens.first(where: { $0.frame.contains(cursor) })
     }
 
     // MARK: - Spatial adjacency (NSScreen coords; y grows up, "above" = higher y)
+    // Logic lives in `ScreenAdjacency` so it's unit-testable without NSScreen.
 
-    /// Returns the nearest screen whose right edge sits at or before `screen`'s left edge.
-    func screenLeft(of screen: ScreenInfo) -> ScreenInfo? {
-        let candidates = screens.filter {
-            $0.id != screen.id && $0.frame.maxX <= screen.frame.minX + 1
-        }
-        return candidates.min { (screen.frame.minX - $0.frame.maxX) < (screen.frame.minX - $1.frame.maxX) }
-    }
-
-    /// Returns the nearest screen whose left edge sits at or after `screen`'s right edge.
-    func screenRight(of screen: ScreenInfo) -> ScreenInfo? {
-        let candidates = screens.filter {
-            $0.id != screen.id && $0.frame.minX >= screen.frame.maxX - 1
-        }
-        return candidates.min { ($0.frame.minX - screen.frame.maxX) < ($1.frame.minX - screen.frame.maxX) }
-    }
-
-    /// Returns the nearest screen physically above `screen` (higher NSScreen y).
-    func screenAbove(of screen: ScreenInfo) -> ScreenInfo? {
-        let candidates = screens.filter {
-            $0.id != screen.id && $0.frame.minY >= screen.frame.maxY - 1
-        }
-        return candidates.min { ($0.frame.minY - screen.frame.maxY) < ($1.frame.minY - screen.frame.maxY) }
-    }
-
-    /// Returns the nearest screen physically below `screen` (lower NSScreen y).
-    func screenBelow(of screen: ScreenInfo) -> ScreenInfo? {
-        let candidates = screens.filter {
-            $0.id != screen.id && $0.frame.maxY <= screen.frame.minY + 1
-        }
-        return candidates.min { (screen.frame.minY - $0.frame.maxY) < (screen.frame.minY - $1.frame.maxY) }
-    }
+    func screenLeft(of screen: ScreenInfo)  -> ScreenInfo? { ScreenAdjacency.screenLeft(of: screen, in: screens) }
+    func screenRight(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenRight(of: screen, in: screens) }
+    func screenAbove(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenAbove(of: screen, in: screens) }
+    func screenBelow(of screen: ScreenInfo) -> ScreenInfo? { ScreenAdjacency.screenBelow(of: screen, in: screens) }
 }
 
 extension NSScreen {
