@@ -55,6 +55,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         aboutItem.target = self
         menu.addItem(aboutItem)
 
+        // PRD-3: temporary test items (removed in PRD-4 once shortcuts land).
+        menu.addItem(.separator())
+        let testHeader = NSMenuItem(title: "Test", action: nil, keyEquivalent: "")
+        testHeader.isEnabled = false
+        menu.addItem(testHeader)
+        addTestItem(menu, title: "Test: Left Half",            zone: DefaultLayouts.halves.zones[0])
+        addTestItem(menu, title: "Test: Right Half",           zone: DefaultLayouts.halves.zones[1])
+        addTestItem(menu, title: "Test: Top-Left Quadrant",    zone: DefaultLayouts.quadrants.zones[0])
+        addTestItem(menu, title: "Test: Top-Right Quadrant",   zone: DefaultLayouts.quadrants.zones[1])
+        addTestItem(menu, title: "Test: Bottom-Left Quadrant", zone: DefaultLayouts.quadrants.zones[2])
+        addTestItem(menu, title: "Test: Bottom-Right Quadrant", zone: DefaultLayouts.quadrants.zones[3])
+
         menu.addItem(.separator())
 
         let quitItem = NSMenuItem(
@@ -65,6 +77,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(quitItem)
 
         return menu
+    }
+
+    private func addTestItem(_ menu: NSMenu, title: String, zone: Zone) {
+        let item = NSMenuItem(title: title, action: #selector(performTestMove(_:)), keyEquivalent: "")
+        item.target = self
+        item.representedObject = zone
+        menu.addItem(item)
+    }
+
+    @objc private func performTestMove(_ sender: NSMenuItem) {
+        guard let zone = sender.representedObject as? Zone else { return }
+        WindowMover.moveFocusedWindow(to: zone, gap: 8)
     }
 
     // MARK: - Permissions
