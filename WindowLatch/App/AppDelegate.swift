@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var onboardingController: OnboardingWindowController?
     private var settingsController: SettingsWindowController?
-    private let cycleCoordinator = CycleCoordinator(settings: .shared)
+    private let cycleCoordinator = CycleCoordinator(settings: .shared, zones: .shared)
     let permissions = PermissionsManager()
 
     func applicationDidFinishLaunching(_ notification: Notification) {

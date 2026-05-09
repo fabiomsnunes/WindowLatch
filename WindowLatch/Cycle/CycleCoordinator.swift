@@ -9,19 +9,21 @@ private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "c
 /// Bridges the pure `CycleEngine` to the live AX / screen world.
 @MainActor
 final class CycleCoordinator {
-    private var engine: CycleEngine
     private var gap: CGFloat
+    private var resetDelay: TimeInterval
     private var state: CycleState = .initial
     private let settings: SettingsStore
+    private let zones: ZoneStore
 
-    init(settings: SettingsStore) {
+    init(settings: SettingsStore, zones: ZoneStore) {
         self.settings = settings
+        self.zones = zones
         self.gap = settings.gap
-        self.engine = CycleEngine(resetDelay: settings.cycleResetDelay)
+        self.resetDelay = settings.cycleResetDelay
         settings.onChange = { [weak self] in
             guard let self else { return }
             self.gap = settings.gap
-            self.engine = CycleEngine(resetDelay: settings.cycleResetDelay)
+            self.resetDelay = settings.cycleResetDelay
         }
     }
 
@@ -42,6 +44,14 @@ final class CycleCoordinator {
 
         let currentZoneID = matchedZoneID(for: frame, on: currentScreen)
         let neighbour = ScreenManager.shared.screen(in: direction, of: currentScreen)
+
+        // Build an engine using the preset selected for the current monitor; the engine
+        // is stateless apart from its constants so reconstructing per-keystroke is cheap.
+        let preset = zones.preset(for: currentScreen.id)
+        let engine = CycleEngine(
+            resetDelay: resetDelay,
+            sequence: { preset.sequence(for: $0) }
+        )
 
         let input = CycleInput(
             direction: direction,
