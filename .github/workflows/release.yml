@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Run tests
+        run: xcodebuild test -scheme WindowLatch -destination 'platform=macOS' -only-testing:WindowLatchTests
+
+      - name: Build archive (ad-hoc signed)
+        run: |
+          xcodebuild -scheme WindowLatch \
+            -configuration Release \
+            -archivePath build/WindowLatch.xcarchive \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM= \
+            archive
+
+      - name: Export .app
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/WindowLatch.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist scripts/exportOptions.plist
+
+      - name: Create .dmg
+        run: |
+          brew install create-dmg
+          create-dmg \
+            --window-size 500 350 \
+            --icon-size 96 \
+            --app-drop-link 350 175 \
+            --icon "WindowLatch.app" 150 175 \
+            "build/WindowLatch-${GITHUB_REF_NAME}.dmg" \
+            build/export/WindowLatch.app
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/WindowLatch-*.dmg
+          draft: false
+          generate_release_notes: true
