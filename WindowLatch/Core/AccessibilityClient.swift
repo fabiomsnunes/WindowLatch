@@ -44,9 +44,11 @@ enum AccessibilityClient {
         return CGRect(origin: origin, size: size)
     }
 
-    /// Sets the frame using the canonical position → size → position sequence.
-    /// Some apps clamp the first set when the new position would push the old size off-screen,
-    /// so the second position write recovers the correct origin.
+    /// Sets the frame using the size → position → size sequence to avoid an intermediate
+    /// state where a still-large window briefly straddles two displays during a cross-monitor
+    /// move. Shrinking first keeps the window inside one display while we set the new origin;
+    /// the trailing size write covers apps that clamp size to the *old* screen bounds before
+    /// the position takes effect.
     @discardableResult
     static func setFrame(_ rect: CGRect, on window: AXUIElement) -> Bool {
         var origin = rect.origin
@@ -55,9 +57,9 @@ enum AccessibilityClient {
         guard let posValue = AXValueCreate(.cgPoint, &origin),
               let sizeValue = AXValueCreate(.cgSize, &size) else { return false }
 
-        let r1 = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
-        let r2 = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
-        let r3 = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
+        let r1 = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
+        let r2 = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
+        let r3 = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
         return r1 == .success && r2 == .success && r3 == .success
     }
 }
