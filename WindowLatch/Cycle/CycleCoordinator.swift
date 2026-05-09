@@ -9,13 +9,20 @@ private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "c
 /// Bridges the pure `CycleEngine` to the live AX / screen world.
 @MainActor
 final class CycleCoordinator {
-    private let engine: CycleEngine
-    private let gap: CGFloat
+    private var engine: CycleEngine
+    private var gap: CGFloat
     private var state: CycleState = .initial
+    private let settings: SettingsStore
 
-    init(engine: CycleEngine = CycleEngine(), gap: CGFloat = 8) {
-        self.engine = engine
-        self.gap = gap
+    init(settings: SettingsStore = .shared) {
+        self.settings = settings
+        self.gap = settings.gap
+        self.engine = CycleEngine(resetDelay: settings.cycleResetDelay)
+        settings.onChange = { [weak self] in
+            guard let self else { return }
+            self.gap = settings.gap
+            self.engine = CycleEngine(resetDelay: settings.cycleResetDelay)
+        }
     }
 
     func handle(_ direction: Direction) {
