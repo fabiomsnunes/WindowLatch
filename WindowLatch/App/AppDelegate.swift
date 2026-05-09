@@ -18,11 +18,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         setupPermissionsObserver()
         setupShortcuts()
+        applyShortcutModifier(SettingsStore.shared.modifier)
+        SettingsStore.shared.addObserver { [weak self] in
+            self?.applyShortcutModifier(SettingsStore.shared.modifier)
+        }
         logStartupDiagnostics()
 
         if !permissions.isTrusted {
             showOnboarding()
         }
+    }
+
+    private func applyShortcutModifier(_ modifier: ShortcutModifier) {
+        let mods = modifier.nsFlags
+        KeyboardShortcuts.setShortcut(.init(.leftArrow,  modifiers: mods), for: .cycleLeft)
+        KeyboardShortcuts.setShortcut(.init(.rightArrow, modifiers: mods), for: .cycleRight)
+        KeyboardShortcuts.setShortcut(.init(.upArrow,    modifiers: mods), for: .cycleUp)
+        KeyboardShortcuts.setShortcut(.init(.downArrow,  modifiers: mods), for: .cycleDown)
+        log.info("Cycle shortcuts bound to \(modifier.rawValue, privacy: .public) + arrows")
     }
 
     private func logStartupDiagnostics() {
@@ -136,7 +149,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Menu actions
 
     @objc private func openSettings(_ sender: Any?) {
-        let controller = settingsController ?? SettingsWindowController(settings: .shared)
+        let controller = settingsController ?? SettingsWindowController(
+            settings: .shared,
+            zones: .shared,
+            screens: .shared
+        )
         settingsController = controller
         controller.show()
     }

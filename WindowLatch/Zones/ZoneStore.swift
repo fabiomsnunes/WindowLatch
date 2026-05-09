@@ -5,7 +5,7 @@ import OSLog
 
 private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "zones")
 
-/// Persists per-monitor cycle preset selections to
+/// Per-monitor selection of enabled `ZoneGroup`s, persisted to
 /// `~/Library/Application Support/WindowLatch/zones.json`. Keyed by
 /// `CGDirectDisplayID` (stable across reboots for built-in displays;
 /// for external displays it's stable for the same physical port).
@@ -14,51 +14,65 @@ private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "z
 final class ZoneStore {
     static let shared = ZoneStore()
 
-    private(set) var presets: [CGDirectDisplayID: CyclePreset]
-    var onChange: (() -> Void)?
+    private(set) var groups: [CGDirectDisplayID: Set<ZoneGroup>]
 
+    @ObservationIgnored private var observers: [() -> Void] = []
     @ObservationIgnored private let fileURL: URL
 
     init(fileURL: URL? = nil) {
         self.fileURL = fileURL ?? Self.defaultFileURL()
-        self.presets = Self.load(from: self.fileURL)
+        self.groups = Self.load(from: self.fileURL)
     }
 
-    func preset(for displayID: CGDirectDisplayID) -> CyclePreset {
-        presets[displayID] ?? .default
+    func addObserver(_ block: @escaping () -> Void) {
+        observers.append(block)
     }
 
-    func setPreset(_ preset: CyclePreset, for displayID: CGDirectDisplayID) {
-        guard presets[displayID] != preset else { return }
-        presets[displayID] = preset
+    private func notify() {
+        observers.forEach { $0() }
+    }
+
+    func enabledGroups(for displayID: CGDirectDisplayID) -> Set<ZoneGroup> {
+        groups[displayID] ?? ZoneGroup.defaults
+    }
+
+    func setGroup(_ group: ZoneGroup, enabled: Bool, for displayID: CGDirectDisplayID) {
+        var current = enabledGroups(for: displayID)
+        if enabled {
+            current.insert(group)
+        } else {
+            current.remove(group)
+        }
+        guard groups[displayID] != current else { return }
+        groups[displayID] = current
         save()
-        onChange?()
+        notify()
     }
 
     // MARK: - Persistence
 
     private struct Persisted: Codable {
-        var presets: [String: CyclePreset]
+        var groups: [String: [ZoneGroup]]
     }
 
     private static func defaultFileURL() -> URL {
         let fm = FileManager.default
         let base = (try? fm.url(for: .applicationSupportDirectory,
-                                 in: .userDomainMask,
-                                 appropriateFor: nil,
-                                 create: true)) ?? fm.homeDirectoryForCurrentUser
+                                in: .userDomainMask,
+                                appropriateFor: nil,
+                                create: true)) ?? fm.homeDirectoryForCurrentUser
         let dir = base.appendingPathComponent("WindowLatch", isDirectory: true)
         try? fm.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("zones.json")
     }
 
-    private static func load(from url: URL) -> [CGDirectDisplayID: CyclePreset] {
+    private static func load(from url: URL) -> [CGDirectDisplayID: Set<ZoneGroup>] {
         guard let data = try? Data(contentsOf: url) else { return [:] }
         do {
             let decoded = try JSONDecoder().decode(Persisted.self, from: data)
-            var out: [CGDirectDisplayID: CyclePreset] = [:]
-            for (k, v) in decoded.presets {
-                if let id = UInt32(k) { out[id] = v }
+            var out: [CGDirectDisplayID: Set<ZoneGroup>] = [:]
+            for (k, v) in decoded.groups {
+                if let id = UInt32(k) { out[id] = Set(v) }
             }
             return out
         } catch {
@@ -69,7 +83,7 @@ final class ZoneStore {
 
     private func save() {
         let serialised = Persisted(
-            presets: Dictionary(uniqueKeysWithValues: presets.map { (String($0.key), $0.value) })
+            groups: Dictionary(uniqueKeysWithValues: groups.map { (String($0.key), Array($0.value)) })
         )
         do {
             let data = try JSONEncoder().encode(serialised)

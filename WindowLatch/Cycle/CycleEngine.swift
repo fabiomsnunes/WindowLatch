@@ -57,17 +57,20 @@ enum CycleAction: Equatable, Sendable {
 nonisolated struct CycleEngine: Sendable {
     let comboTimeout: TimeInterval
     let resetDelay: TimeInterval
+    let comboEnabled: Bool
     let sequence: @Sendable (Direction) -> [Zone]
     let crossMonitorEntry: @Sendable (Direction) -> Zone
 
     init(
         comboTimeout: TimeInterval = 1.5,
         resetDelay: TimeInterval = 1.5,
+        comboEnabled: Bool = true,
         sequence: @escaping @Sendable (Direction) -> [Zone] = CycleDefinition.sequence(for:),
         crossMonitorEntry: @escaping @Sendable (Direction) -> Zone = CycleDefinition.crossMonitorEntry(for:)
     ) {
         self.comboTimeout = comboTimeout
         self.resetDelay = resetDelay
+        self.comboEnabled = comboEnabled
         self.sequence = sequence
         self.crossMonitorEntry = crossMonitorEntry
     }
@@ -77,7 +80,8 @@ nonisolated struct CycleEngine: Sendable {
         let directionSequence = sequence(input.direction)
 
         // 1) Combo branch — axis crosses within combo window.
-        if let lastDir = input.state.lastDirection,
+        if comboEnabled,
+           let lastDir = input.state.lastDirection,
            let lastZone = input.state.lastZone,
            dt <= comboTimeout,
            lastDir.axis != input.direction.axis {
@@ -142,8 +146,11 @@ nonisolated struct CycleEngine: Sendable {
             }
         }
 
-        // 4) Default — start sequence.
-        let first = directionSequence[0]
+        // 4) Default — start sequence. If the user disabled every group on this axis,
+        // the sequence is empty and there's nothing to do.
+        guard let first = directionSequence.first else {
+            return (.noOp, input.state)
+        }
         let newState = CycleState(lastDirection: input.direction, lastZone: first, lastTimestamp: input.now)
         return (.apply(first, on: .current), newState)
     }

@@ -3,8 +3,8 @@ import Foundation
 import Observation
 
 /// User-tunable settings persisted in `UserDefaults`. Read by `CycleCoordinator`
-/// (gap) and `CycleEngine` (cycleResetDelay). Mutations notify `onChange` so
-/// the coordinator can rebuild its engine.
+/// (gap, resetDelay) and `AppDelegate` (modifier). Mutations notify all
+/// registered observers so consumers can react without a restart.
 @Observable
 @MainActor
 final class SettingsStore {
@@ -13,20 +13,20 @@ final class SettingsStore {
     private enum Key {
         static let gap = "gap"
         static let cycleResetDelay = "cycleResetDelay"
+        static let modifier = "shortcutModifier"
     }
 
     private enum Defaults {
         static let gap: CGFloat = 8
         static let cycleResetDelay: TimeInterval = 1.5
+        static let modifier: ShortcutModifier = .default
     }
-
-    var onChange: (() -> Void)?
 
     var gap: CGFloat {
         didSet {
             guard gap != oldValue else { return }
             UserDefaults.standard.set(Double(gap), forKey: Key.gap)
-            onChange?()
+            notify()
         }
     }
 
@@ -34,9 +34,19 @@ final class SettingsStore {
         didSet {
             guard cycleResetDelay != oldValue else { return }
             UserDefaults.standard.set(cycleResetDelay, forKey: Key.cycleResetDelay)
-            onChange?()
+            notify()
         }
     }
+
+    var modifier: ShortcutModifier {
+        didSet {
+            guard modifier != oldValue else { return }
+            UserDefaults.standard.set(modifier.rawValue, forKey: Key.modifier)
+            notify()
+        }
+    }
+
+    @ObservationIgnored private var observers: [() -> Void] = []
 
     private init() {
         let defaults = UserDefaults.standard
@@ -50,10 +60,25 @@ final class SettingsStore {
         } else {
             self.cycleResetDelay = Defaults.cycleResetDelay
         }
+        if let raw = defaults.string(forKey: Key.modifier),
+           let m = ShortcutModifier(rawValue: raw) {
+            self.modifier = m
+        } else {
+            self.modifier = Defaults.modifier
+        }
+    }
+
+    func addObserver(_ block: @escaping () -> Void) {
+        observers.append(block)
+    }
+
+    private func notify() {
+        observers.forEach { $0() }
     }
 
     func restoreDefaults() {
         gap = Defaults.gap
         cycleResetDelay = Defaults.cycleResetDelay
+        modifier = Defaults.modifier
     }
 }

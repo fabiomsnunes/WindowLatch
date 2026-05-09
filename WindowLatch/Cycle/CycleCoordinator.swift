@@ -20,7 +20,7 @@ final class CycleCoordinator {
         self.zones = zones
         self.gap = settings.gap
         self.resetDelay = settings.cycleResetDelay
-        settings.onChange = { [weak self] in
+        settings.addObserver { [weak self] in
             guard let self else { return }
             self.gap = settings.gap
             self.resetDelay = settings.cycleResetDelay
@@ -45,12 +45,14 @@ final class CycleCoordinator {
         let currentZoneID = matchedZoneID(for: frame, on: currentScreen)
         let neighbour = ScreenManager.shared.screen(in: direction, of: currentScreen)
 
-        // Build an engine using the preset selected for the current monitor; the engine
-        // is stateless apart from its constants so reconstructing per-keystroke is cheap.
-        let preset = zones.preset(for: currentScreen.id)
+        // Build an engine using the zone groups enabled for the current monitor; the
+        // engine is stateless apart from its constants so reconstructing per-keystroke
+        // is cheap. Combo (quadrant snap) is gated on the `quarters` group.
+        let enabled = zones.enabledGroups(for: currentScreen.id)
         let engine = CycleEngine(
             resetDelay: resetDelay,
-            sequence: { preset.sequence(for: $0) }
+            comboEnabled: enabled.contains(.quarters),
+            sequence: { ZoneGroup.sequence(for: $0, enabled: enabled) }
         )
 
         let input = CycleInput(
