@@ -128,10 +128,13 @@ struct CycleEngineTests {
         #expect(action == .apply(DefaultLayouts.rightTwoThirds, on: .current))
     }
 
-    // MARK: - Reset
+    // MARK: - Long pause continuation (no aggressive reset)
 
     @Test
-    func pauseExceedsResetDelay_nextPressStartsAtFirstZone() {
+    func pauseExceedsResetDelay_continuesCycleFromCurrentPosition() {
+        // After a 3s pause, pressing left while window is in left-half should advance
+        // to left-third — NOT restart at left-two-thirds. The window's current zone is
+        // the source of truth, not a stale lastZone.
         let state = CycleState(lastDirection: .left, lastZone: DefaultLayouts.leftHalf, lastTimestamp: t0)
         let (action, _) = engine.process(CycleInput(
             direction: .left,
@@ -140,7 +143,7 @@ struct CycleEngineTests {
             hasNeighbour: false,
             state: state
         ))
-        #expect(action == .apply(DefaultLayouts.leftTwoThirds, on: .current))
+        #expect(action == .apply(DefaultLayouts.leftThird, on: .current))
     }
 
     @Test
