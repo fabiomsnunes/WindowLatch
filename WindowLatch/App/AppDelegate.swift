@@ -1,6 +1,9 @@
 import AppKit
 import KeyboardShortcuts
+import OSLog
 import SwiftUI
+
+private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "startup")
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
@@ -15,9 +18,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         setupPermissionsObserver()
         setupShortcuts()
+        logStartupDiagnostics()
 
         if !permissions.isTrusted {
             showOnboarding()
+        }
+    }
+
+    private func logStartupDiagnostics() {
+        log.info("WindowLatch starting; AX trusted=\(self.permissions.isTrusted, privacy: .public)")
+        for (i, screen) in NSScreen.screens.enumerated() {
+            let id = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? 0
+            let f = screen.frame
+            let v = screen.visibleFrame
+            log.info(
+                """
+                screen[\(i, privacy: .public)] id=\(id, privacy: .public) \
+                frame=(\(f.minX, privacy: .public),\(f.minY, privacy: .public) \
+                \(f.width, privacy: .public)x\(f.height, privacy: .public)) \
+                visible=(\(v.minX, privacy: .public),\(v.minY, privacy: .public) \
+                \(v.width, privacy: .public)x\(v.height, privacy: .public))
+                """
+            )
         }
     }
 
