@@ -72,16 +72,6 @@ The app polls the TCC database and detects the change automatically — no resta
 - **Fullscreen Spaces**: WindowLatch can't move a window that's currently in a dedicated fullscreen Space. Exit fullscreen first.
 - **Screen Recording-style apps** that take over the display may steal global shortcuts.
 
-## Logging
-
-All runtime events are logged to the unified system log. To follow what WindowLatch is doing:
-
-```bash
-log stream --predicate 'subsystem == "com.fabiomsnunes.WindowLatch"' --level debug
-```
-
-Or use **Console.app** with the same subsystem filter.
-
 ## Contributing
 
 PRs welcome. Before committing, run:
