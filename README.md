@@ -2,7 +2,7 @@
 
 > Native macOS window manager with cycling zones — the FancyZones experience for Mac, done right.
 
-![WindowLatch hero — four windows snapped into a clean grid on a macOS desktop](docs/assets/hero.jpg)
+![WindowLatch hero — four windows snapped into a clean grid on a macOS desktop](assets/hero.jpg)
 
 WindowLatch is a personal-use, open-source window manager for macOS, built because [Rectangle Pro](https://rectangleapp.com)'s cycling behaviour wasn't quite right and Microsoft PowerToys' FancyZones isn't available on Mac.
 
