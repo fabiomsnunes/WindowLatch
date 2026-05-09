@@ -256,6 +256,42 @@ struct CycleEngineTests {
         #expect(action == .apply(DefaultLayouts.rightTwoThirds, on: .current))
     }
 
+    // MARK: - Combo gating
+
+    @Test
+    func combo_disabledByConfig_fallsThroughInsteadOfQuadrant() {
+        // With comboEnabled=false, an axis-cross press behaves as a fresh first-press
+        // in the new direction's sequence — it does NOT produce a quarter intersection.
+        let engine = CycleEngine(comboEnabled: false)
+        let state = CycleState(lastDirection: .left, lastZone: DefaultLayouts.leftHalf, lastTimestamp: t0)
+        let (action, _) = engine.process(CycleInput(
+            direction: .up,
+            currentZoneID: "left-half",
+            now: t0.addingTimeInterval(0.5),
+            hasNeighbour: false,
+            state: state
+        ))
+        #expect(action == .apply(DefaultLayouts.topTwoThirds, on: .current))
+    }
+
+    // MARK: - Empty configuration
+
+    @Test
+    func emptyDirectionSequence_isNoOp() {
+        // If user disables every group on this axis, the sequence is empty —
+        // engine returns noOp instead of crashing on first-zone access.
+        let engine = CycleEngine(sequence: { _ in [] })
+        let (action, newState) = engine.process(CycleInput(
+            direction: .left,
+            currentZoneID: nil,
+            now: t0,
+            hasNeighbour: false,
+            state: .initial
+        ))
+        #expect(action == .noOp)
+        #expect(newState == .initial)
+    }
+
     @Test
     func allFourDirections_haveSymmetricFirstZones() {
         for (dir, expected): (Direction, Zone) in [
