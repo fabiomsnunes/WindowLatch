@@ -66,8 +66,6 @@ The app polls the TCC database and detects the change automatically — no resta
 - `ScreenAdjacency` is a pure helper — also unit-tested
 - Hybrid persistence: UserDefaults (gap, delay, modifier) + JSON (per-monitor zone groups)
 
-See [`docs/2026-05-07-initial-plan.md`](docs/2026-05-07-initial-plan.md) for design rationale and the [`docs/prds/`](docs/prds/) directory for the per-step PRDs.
-
 ## Limitations
 
 - **Electron / non-native apps** (VS Code, Slack, Discord) sometimes resist `setSize` and snap back. Native apps and most well-behaved Cocoa apps work perfectly.
