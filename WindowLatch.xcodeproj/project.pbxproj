@@ -112,6 +112,7 @@
 			);
 			name = WindowLatch;
 			packageProductDependencies = (
+				BD514A8B2FAF779400E3D6C6 /* KeyboardShortcuts */,
 			);
 			productName = WindowLatch;
 			productReference = BD35746F2FAD145A00AFC5DB /* WindowLatch.app */;
@@ -195,6 +196,9 @@
 			);
 			mainGroup = BD3574662FAD145A00AFC5DB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BD514A8A2FAF779400E3D6C5 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BD3574702FAD145A00AFC5DB /* Products */;
 			projectDirPath = "";
@@ -567,6 +571,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BD514A8A2FAF779400E3D6C5 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BD514A8B2FAF779400E3D6C6 /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD514A8A2FAF779400E3D6C5 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BD3574672FAD145A00AFC5DB /* Project object */;
 }
