@@ -58,19 +58,6 @@ final class PermissionsManager {
         onChange?(trusted)
     }
 
-    /// Triggers the native macOS prompt asking the user to grant Accessibility. This also
-    /// adds an entry to the TCC database keyed to the current binary's signature, which is
-    /// essential when the app has been re-signed (e.g. after switching from ad-hoc to a
-    /// development team) and stale entries don't match.
-    func requestAccessWithPrompt() {
-        let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
-        let trusted = AXIsProcessTrustedWithOptions(options as CFDictionary)
-        if trusted != isTrusted {
-            isTrusted = trusted
-            onChange?(trusted)
-        }
-    }
-
     func startPolling() {
         pollTimer?.invalidate()
         pollTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
