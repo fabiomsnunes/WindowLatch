@@ -7,8 +7,16 @@ struct CycleState: Equatable, Sendable {
     var lastDirection: Direction?
     var lastZone: Zone?
     var lastTimestamp: Date?
+    /// Set when the last action was a cross-monitor jump; consumed by the jump-back branch
+    /// when the user immediately presses the opposite direction.
+    var lastJumpDirection: Direction? = nil
 
-    static let initial = CycleState(lastDirection: nil, lastZone: nil, lastTimestamp: nil)
+    static let initial = CycleState(
+        lastDirection: nil,
+        lastZone: nil,
+        lastTimestamp: nil,
+        lastJumpDirection: nil
+    )
 }
 
 struct CycleInput: Equatable, Sendable {
@@ -38,9 +46,10 @@ enum CycleAction: Equatable, Sendable {
 /// State machine summary (Δt = now − state.lastTimestamp):
 ///
 ///     1. axis crosses && Δt ≤ comboTimeout                          → apply combo intersection on current
-///     2. opposite of lastDirection && current in lastDir's sequence → step BACK in lastDir's sequence
-///     3. currentZoneID is in sequence                               → next zone (or cross-monitor on tail)
-///     4. otherwise                                                  → apply first zone of sequence
+///     2. opposite of lastJumpDirection && Δt ≤ resetDelay           → cross-monitor jump back to original
+///     3. opposite of lastDirection && current in lastDir's sequence → step BACK in lastDir's sequence
+///     4. currentZoneID is in sequence                               → next zone (or cross-monitor on tail)
+///     5. otherwise                                                  → apply first zone of sequence
 ///
 /// The window's current zone is always the source of truth — a long pause does NOT
 /// restart the cycle at the largest zone, because that would diverge from what the
@@ -77,7 +86,24 @@ nonisolated struct CycleEngine: Sendable {
             return (.apply(comboZone, on: .current), newState)
         }
 
-        // 2) Reverse cycle — pressing the opposite of the last direction undoes the last step.
+        // 2) Jump-back — user immediately presses the opposite of the last cross-monitor jump.
+        //    Returns to the original monitor's mirror-zone (e.g. after a leftward jump that
+        //    landed on rightHalf, pressing → jumps back to leftHalf on the previous screen).
+        if let lastJump = input.state.lastJumpDirection,
+           input.direction == lastJump.opposite,
+           dt <= resetDelay,
+           input.hasNeighbour {
+            let entry = crossMonitorEntry(input.direction)
+            let newState = CycleState(
+                lastDirection: input.direction,
+                lastZone: entry,
+                lastTimestamp: input.now,
+                lastJumpDirection: input.direction
+            )
+            return (.apply(entry, on: .neighbour), newState)
+        }
+
+        // 3) Reverse cycle — pressing the opposite of the last direction undoes the last step.
         //    Concretely: after → → (window now in right-half), pressing ← returns to
         //    rightTwoThirds rather than jumping to a left zone.
         if let lastDir = input.state.lastDirection,
@@ -102,7 +128,12 @@ nonisolated struct CycleEngine: Sendable {
             } else {
                 if input.hasNeighbour {
                     let entry = crossMonitorEntry(input.direction)
-                    let newState = CycleState(lastDirection: input.direction, lastZone: entry, lastTimestamp: input.now)
+                    let newState = CycleState(
+                        lastDirection: input.direction,
+                        lastZone: entry,
+                        lastTimestamp: input.now,
+                        lastJumpDirection: input.direction
+                    )
                     return (.apply(entry, on: .neighbour), newState)
                 } else {
                     let newState = CycleState(lastDirection: input.direction, lastZone: input.state.lastZone, lastTimestamp: input.now)

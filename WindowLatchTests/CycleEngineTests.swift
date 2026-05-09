@@ -165,6 +165,67 @@ struct CycleEngineTests {
         #expect(action == .apply(DefaultLayouts.leftTwoThirds, on: .current))
     }
 
+    // MARK: - Jump-back
+
+    @Test
+    func jumpBack_oppositeOfLastJump_returnsToOriginalMonitor() {
+        // After a leftward cross-monitor jump landed on rightHalf of the neighbour monitor,
+        // pressing right within the reset window should jump back to the original (left) monitor.
+        let state = CycleState(
+            lastDirection: .left,
+            lastZone: DefaultLayouts.rightHalf,
+            lastTimestamp: t0,
+            lastJumpDirection: .left
+        )
+        let (action, newState) = engine.process(CycleInput(
+            direction: .right,
+            currentZoneID: "right-half",
+            now: t0.addingTimeInterval(0.3),
+            hasNeighbour: true,
+            state: state
+        ))
+        #expect(action == .apply(DefaultLayouts.leftHalf, on: .neighbour))
+        #expect(newState.lastJumpDirection == .right)
+    }
+
+    @Test
+    func jumpBack_afterResetDelay_doesNotFire() {
+        // Same setup but past the reset delay → branch 2 doesn't fire.
+        // Falls through to reverse-cycle (right-half is in right-sequence at idx 1; lastDir=.left,
+        // input=.right → opposite, lastDirSequence(.left) doesn't contain "right-half" → no).
+        // Falls to cycle continuation: right-half in right-seq at idx 1 → next = rightThird.
+        let state = CycleState(
+            lastDirection: .left,
+            lastZone: DefaultLayouts.rightHalf,
+            lastTimestamp: t0,
+            lastJumpDirection: .left
+        )
+        let (action, _) = engine.process(CycleInput(
+            direction: .right,
+            currentZoneID: "right-half",
+            now: t0.addingTimeInterval(3.0),
+            hasNeighbour: true,
+            state: state
+        ))
+        #expect(action == .apply(DefaultLayouts.rightThird, on: .current))
+    }
+
+    @Test
+    func crossMonitorJump_setsLastJumpDirection() {
+        // Window in left-third (tail of left-sequence), pressing left with neighbour → jump.
+        // Verifies that the regular cross-monitor branch records lastJumpDirection so
+        // the immediate opposite-press triggers jump-back rather than continuation.
+        let state = CycleState(lastDirection: .left, lastZone: DefaultLayouts.leftThird, lastTimestamp: t0)
+        let (_, newState) = engine.process(CycleInput(
+            direction: .left,
+            currentZoneID: "left-third",
+            now: t0.addingTimeInterval(0.3),
+            hasNeighbour: true,
+            state: state
+        ))
+        #expect(newState.lastJumpDirection == .left)
+    }
+
     // MARK: - Long pause continuation (no aggressive reset)
 
     @Test
