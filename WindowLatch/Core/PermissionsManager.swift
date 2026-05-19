@@ -51,7 +51,7 @@ final class PermissionsManager {
     }
 
     func recheck() {
-        let trusted = AXIsProcessTrustedWithOptions(nil)
+        let trusted = AccessibilityClient.isTrusted()
         guard trusted != isTrusted else { return }
         log.info("Accessibility trust changed: \(trusted, privacy: .public)")
         isTrusted = trusted

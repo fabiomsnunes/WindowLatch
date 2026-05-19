@@ -6,6 +6,28 @@ import ApplicationServices
 /// Frames returned/accepted by this client are in AX coordinates: top-left origin,
 /// y grows downward, relative to the primary screen's top-left.
 enum AccessibilityClient {
+    /// Reports whether the process can drive the Accessibility API.
+    ///
+    /// `AXIsProcessTrusted()` caches its result per-process: once it has returned
+    /// `false` it can keep doing so for the process lifetime even after the user
+    /// grants permission to the already-running app. We still call it first — it
+    /// registers the app in the Accessibility pane and is correct on the happy
+    /// path — but fall back to a live AX read, which reflects the real grant.
+    static func isTrusted() -> Bool {
+        if AXIsProcessTrusted() { return true }
+
+        let systemWide = AXUIElementCreateSystemWide()
+        var ref: CFTypeRef?
+        let err = AXUIElementCopyAttributeValue(
+            systemWide,
+            kAXFocusedApplicationAttribute as CFString,
+            &ref
+        )
+        // `.apiDisabled` is the only result that means "not trusted"; any other
+        // outcome means the API is live for this process.
+        return err != .apiDisabled
+    }
+
     static func focusedWindow() -> AXUIElement? {
         let systemWide = AXUIElementCreateSystemWide()
 
