@@ -2,9 +2,9 @@ import AppKit
 import SwiftUI
 
 final class SettingsWindowController: NSWindowController {
-    init(settings: SettingsStore, zones: ZoneStore, screens: ScreenManager) {
+    init(settings: SettingsStore, zones: ZoneStore, screens: ScreenManager, permissions: PermissionsManager) {
         let hostingController = NSHostingController(
-            rootView: SettingsView(settings: settings, zones: zones, screens: screens)
+            rootView: SettingsView(settings: settings, zones: zones, screens: screens, permissions: permissions)
         )
 
         let window = NSWindow(contentViewController: hostingController)

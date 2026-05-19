@@ -58,6 +58,29 @@ final class PermissionsManager {
         onChange?(trusted)
     }
 
+    /// Clears WindowLatch's Accessibility grant via `tccutil`, then relaunches the app.
+    ///
+    /// A reset leaves the *running* process in a half-trusted state that's awkward to
+    /// recover from in place — the same state the onboarding screen warns about. So we
+    /// relaunch into a clean launch, where `applicationDidFinishLaunching` sees the
+    /// missing permission and shows onboarding again.
+    func resetAccessibilityAndRelaunch() {
+        guard let bundleID = Bundle.main.bundleIdentifier else { return }
+
+        let reset = Process()
+        reset.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+        reset.arguments = ["reset", "Accessibility", bundleID]
+        try? reset.run()
+        reset.waitUntilExit()
+
+        let relaunch = Process()
+        relaunch.executableURL = URL(fileURLWithPath: "/bin/sh")
+        relaunch.arguments = ["-c", "sleep 1; open \"\(Bundle.main.bundlePath)\""]
+        try? relaunch.run()
+
+        NSApp.terminate(nil)
+    }
+
     func startPolling() {
         pollTimer?.invalidate()
         pollTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in

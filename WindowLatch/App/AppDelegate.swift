@@ -114,7 +114,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let controller = settingsController ?? SettingsWindowController(
             settings: .shared,
             zones: .shared,
-            screens: .shared
+            screens: .shared,
+            permissions: permissions
         )
         settingsController = controller
         controller.show()

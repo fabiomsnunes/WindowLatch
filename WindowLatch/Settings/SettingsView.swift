@@ -4,15 +4,60 @@ struct SettingsView: View {
     @Bindable var settings: SettingsStore
     @Bindable var zones: ZoneStore
     @Bindable var screens: ScreenManager
+    @Bindable var permissions: PermissionsManager
+
+    @State private var showResetConfirmation = false
 
     var body: some View {
         Form {
             generalSection
             zonesSection
+            accessibilitySection
             aboutSection
         }
         .formStyle(.grouped)
         .frame(width: 540, height: 620)
+    }
+
+    // MARK: - Accessibility
+
+    private var accessibilitySection: some View {
+        Section {
+            HStack(spacing: 8) {
+                Image(systemName: permissions.isTrusted ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(permissions.isTrusted ? .green : .red)
+                Text(permissions.isTrusted ? "Accessibility access granted" : "Accessibility access not granted")
+                Spacer()
+            }
+
+            Button("Reset Accessibility Permission…", role: .destructive) {
+                showResetConfirmation = true
+            }
+            .confirmationDialog(
+                "Reset Accessibility permission?",
+                isPresented: $showResetConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Reset & Relaunch", role: .destructive) {
+                    permissions.resetAccessibilityAndRelaunch()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "WindowLatch will be removed from the Accessibility list and relaunched "
+                        + "so macOS prompts you to grant access again."
+                )
+            }
+        } header: {
+            Text("Accessibility")
+        } footer: {
+            Text(
+                "Use this if window snapping stops working — it clears a stale permission "
+                    + "and walks you through granting access from scratch."
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - General
