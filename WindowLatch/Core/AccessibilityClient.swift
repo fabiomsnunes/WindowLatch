@@ -28,26 +28,27 @@ enum AccessibilityClient {
         return err != .apiDisabled
     }
 
+    /// Resolves the window to act on for the frontmost app.
+    ///
+    /// We identify the frontmost app via `NSWorkspace` rather than the systemwide
+    /// AX element's `kAXFocusedApplicationAttribute`: some apps (Spark, …) never
+    /// register as the AX focused application, so that attribute returns
+    /// `kAXErrorNoValue`. `NSWorkspace` always reports the frontmost app.
+    ///
+    /// `kAXFocusedWindowAttribute` is then the right answer for well-behaved apps,
+    /// but some Electron apps never publish it either — so we fall back to the
+    /// main window, then to the first standard window in the app's window list.
     static func focusedWindow() -> AXUIElement? {
-        let systemWide = AXUIElementCreateSystemWide()
+        guard let frontApp = NSWorkspace.shared.frontmostApplication else { return nil }
+        let appElement = AXUIElementCreateApplication(frontApp.processIdentifier)
 
-        var focusedAppRef: CFTypeRef?
-        let appResult = AXUIElementCopyAttributeValue(
-            systemWide,
-            kAXFocusedApplicationAttribute as CFString,
-            &focusedAppRef
-        )
-        guard appResult == .success, let appRef = focusedAppRef else { return nil }
-        let appElement = appRef as! AXUIElement
-
-        var focusedWinRef: CFTypeRef?
-        let winResult = AXUIElementCopyAttributeValue(
-            appElement,
-            kAXFocusedWindowAttribute as CFString,
-            &focusedWinRef
-        )
-        guard winResult == .success, let winRef = focusedWinRef else { return nil }
-        return (winRef as! AXUIElement)
+        if let window = copyElement(appElement, kAXFocusedWindowAttribute) {
+            return window
+        }
+        if let window = copyElement(appElement, kAXMainWindowAttribute) {
+            return window
+        }
+        return firstStandardWindow(of: appElement)
     }
 
     static func frame(of window: AXUIElement) -> CGRect? {
@@ -83,5 +84,29 @@ enum AccessibilityClient {
         let r2 = AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
         let r3 = AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
         return r1 == .success && r2 == .success && r3 == .success
+    }
+
+    /// Copies an attribute expected to hold a single `AXUIElement`, or `nil`.
+    private static func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
+        var ref: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &ref)
+        guard result == .success, let ref else { return nil }
+        return (ref as! AXUIElement)
+    }
+
+    /// Returns the app's main window if one is flagged, otherwise its first window.
+    private static func firstStandardWindow(of app: AXUIElement) -> AXUIElement? {
+        var ref: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &ref)
+        guard result == .success, let windows = ref as? [AXUIElement], !windows.isEmpty else {
+            return nil
+        }
+        let main = windows.first { window in
+            var mainRef: CFTypeRef?
+            let r = AXUIElementCopyAttributeValue(window, kAXMainAttribute as CFString, &mainRef)
+            return r == .success
+                && (mainRef as? Bool == true || (mainRef as? NSNumber)?.boolValue == true)
+        }
+        return main ?? windows.first
     }
 }
