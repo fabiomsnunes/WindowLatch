@@ -1,6 +1,11 @@
 # WindowLatch — a free, open-source window manager for macOS
 
-**A fast, focused window manager for macOS.**
+[![Latest release](https://img.shields.io/github/v/release/fabiomsnunes/WindowLatch?label=download)](https://github.com/fabiomsnunes/WindowLatch/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Platform: macOS 26+](https://img.shields.io/badge/platform-macOS%2026%2B-lightgrey.svg)](#install)
+[![Built with Swift 6](https://img.shields.io/badge/swift-6-orange.svg)](https://swift.org)
+
+**A fast, focused window manager for macOS.** [**⬇ Download the latest `.dmg`**](https://github.com/fabiomsnunes/WindowLatch/releases/latest) — ~400 KB, no installer, no account.
 
 Cycle the focused window through ⅔ → ½ → ⅓ zones with one keyboard shortcut per direction. Combine directions for quadrants. Jump across monitors when you run out of room. Inspired by Microsoft PowerToys' **FancyZones**.
 
@@ -12,16 +17,6 @@ Cycle the focused window through ⅔ → ½ → ⅓ zones with one keyboard shor
 - **It respects each monitor.** Configure halves / thirds / quarters independently per display — your ultrawide and your 4K don't have to agree.
 - **It's a 400 KB download.** Native Swift + AppKit. No Electron, no background daemons, no analytics.
 - **It's MIT-licensed and open source.** Read the code. Fork it.
-
-## Download
-
-[**⬇ Get the latest release**](https://github.com/fabiomsnunes/WindowLatch/releases/latest) — single `.dmg`, ad-hoc signed.
-
-Requires **macOS 26 (Tahoe)** or later, Apple Silicon or Intel.
-[![Latest release](https://img.shields.io/github/v/release/fabiomsnunes/WindowLatch?label=download)](https://github.com/fabiomsnunes/WindowLatch/releases/latest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Platform: macOS 26+](https://img.shields.io/badge/platform-macOS%2026%2B-lightgrey.svg)](#install)
-[![Built with Swift 6](https://img.shields.io/badge/swift-6-orange.svg)](https://swift.org)
 
 ![WindowLatch — four windows snapped into a clean grid on a macOS desktop](assets/hero.jpg)
 
@@ -53,8 +48,26 @@ The modifier is reconfigurable in Settings (Ctrl+Option, Ctrl+Cmd, Cmd+Option, o
 
 1. Download `WindowLatch-vX.Y.Z.dmg` from [Releases](https://github.com/fabiomsnunes/WindowLatch/releases/latest).
 2. Open the `.dmg` and drag **WindowLatch** to `/Applications`.
-3. First launch: double-click WindowLatch. Gatekeeper will block it (the build is ad-hoc signed, not notarised). Open **System Settings → Privacy & Security**, scroll to the "WindowLatch was blocked…" notice and click **Open Anyway**, then confirm in the dialog.
-4. Grant **Accessibility** when prompted (see below).
+3. **First launch.** The build is ad-hoc signed (not notarised), so Gatekeeper blocks it. On macOS 15 and later the old right-click → Open trick no longer works — use the steps below:
+   1. Double-click **WindowLatch**. macOS shows _"Apple could not verify 'WindowLatch' is free of malware…"_ — click **Done** (the app does not open yet).
+   2. Open **System Settings → Privacy & Security** and scroll down. You'll see _"WindowLatch was blocked to protect your Mac."_ — click **Open Anyway**.
+   3. Authenticate with Touch ID or your password, then click **Open Anyway** in the final confirmation dialog.
+
+   You only do this once — afterwards WindowLatch launches like any other app.
+4. Grant **Accessibility** when prompted (see [below](#accessibility-permission)).
+
+WindowLatch is a **menu-bar app** — once running, look for its icon in the menu bar, not the Dock. To have it start automatically, add it under **System Settings → General → Login Items**.
+
+### Verify the download (optional)
+
+The release is built by [GitHub Actions](.github/workflows/release.yml) straight from a tagged commit — no manual upload. To confirm the `.app` is the unmodified ad-hoc build:
+
+```bash
+codesign --verify --deep --strict --verbose=2 /Applications/WindowLatch.app
+# expected: "valid on disk" and "satisfies its Designated Requirement"
+codesign -dvv /Applications/WindowLatch.app 2>&1 | grep -E 'Identifier|Signature'
+# expected: Identifier=com.fabiomsnunes.WindowLatch, Signature=adhoc
+```
 
 ### Build from source
 
