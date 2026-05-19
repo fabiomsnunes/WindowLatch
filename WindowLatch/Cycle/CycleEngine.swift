@@ -163,22 +163,28 @@ nonisolated struct CycleEngine {
         return (.apply(first, on: .current), newState)
     }
 
+    /// Builds the quadrant for a cross-axis combo press.
+    ///
+    /// The pressed direction fixes one axis-half; the previous zone fixes the
+    /// other via the side it is biased toward. The result is always a clean
+    /// ½×½ quadrant, *independent* of the size the previous zone was cycled to —
+    /// so `→` then `↑` lands on the top-right quarter directly, with no need to
+    /// first cycle down to a half.
     private func makeComboZone(from base: Zone, direction: Direction) -> Zone {
         let r = base.rect
-        let newRect = switch direction {
-        case .up:
-            CGRect(x: r.minX, y: r.minY, width: r.width, height: r.height / 2)
-        case .down:
-            CGRect(x: r.minX, y: r.minY + r.height / 2, width: r.width, height: r.height / 2)
-        case .left:
-            CGRect(x: r.minX, y: r.minY, width: r.width / 2, height: r.height)
-        case .right:
-            CGRect(x: r.minX + r.width / 2, y: r.minY, width: r.width / 2, height: r.height)
+        let onLeft: Bool
+        let onTop: Bool
+        switch direction {
+        case .up: onTop = true; onLeft = r.midX < 0.5
+        case .down: onTop = false; onLeft = r.midX < 0.5
+        case .left: onLeft = true; onTop = r.midY < 0.5
+        case .right: onLeft = false; onTop = r.midY < 0.5
         }
-        return Zone(
-            id: "combo-\(base.id)-\(direction.rawValue)",
-            label: "Combo \(base.label) + \(direction.rawValue)",
-            rect: newRect
-        )
+        switch (onLeft, onTop) {
+        case (true, true): return DefaultLayouts.topLeftQuadrant
+        case (false, true): return DefaultLayouts.topRightQuadrant
+        case (true, false): return DefaultLayouts.bottomLeftQuadrant
+        case (false, false): return DefaultLayouts.bottomRightQuadrant
+        }
     }
 }

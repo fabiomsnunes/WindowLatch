@@ -103,6 +103,22 @@ struct CycleEngineTests {
     }
 
     @Test
+    func comboFromTwoThirds_stillSnapsToCleanQuadrant() {
+        // The cycle sequence starts at two-thirds, so a combo on the very first
+        // press has a two-thirds base. The result must still be a clean ½×½
+        // quadrant, not a two-thirds-wide strip.
+        let state = CycleState(lastDirection: .right, lastZone: DefaultLayouts.rightTwoThirds, lastTimestamp: t0)
+        let (action, _) = engine.process(CycleInput(
+            direction: .up,
+            currentZoneID: "right-two-thirds",
+            now: t0.addingTimeInterval(0.5),
+            hasNeighbour: false,
+            state: state
+        ))
+        #expect(action == .apply(DefaultLayouts.topRightQuadrant, on: .current))
+    }
+
+    @Test
     func leftThenUp_after2s_isNotComboButReset() {
         let state = CycleState(lastDirection: .left, lastZone: DefaultLayouts.leftHalf, lastTimestamp: t0)
         let (action, _) = engine.process(CycleInput(
