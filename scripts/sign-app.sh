@@ -22,11 +22,13 @@ sign() {
 }
 
 # Nested code first (find -depth lists children before their parent): a bundle's
-# signature covers what it contains, so it has to be signed last.
+# signature covers what it contains, so it has to be signed last. Autoupdate is the
+# Sparkle helper executable, which has no bundle extension to match on.
 while IFS= read -r nested; do
   sign "$nested"
 done < <(
-  find "$APP/Contents" -depth \( -name '*.framework' -o -name '*.xpc' -o -name '*.app' -o -name '*.dylib' \) -print
+  find "$APP/Contents" -depth \( -name '*.framework' -o -name '*.xpc' -o -name '*.app' -o -name '*.dylib' \
+    -o \( -name Autoupdate -type f \) \) -print
 )
 sign "$APP"
 
