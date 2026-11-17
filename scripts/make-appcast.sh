@@ -22,6 +22,17 @@ if [[ "v$short_version" != "$TAG" ]]; then
   exit 1
 fi
 
+# Sparkle offers an update only when the build number (CFBundleVersion) goes up, so a
+# release that bumps MARKETING_VERSION alone would reach nobody. Releases before 1.1.0
+# have no appcast; then there is nothing to compare against.
+if published_feed="$(curl -fsSL "$REPO_URL/releases/latest/download/appcast.xml" 2>/dev/null)"; then
+  published_build="$(sed -n 's:.*<sparkle\:version>\(.*\)</sparkle\:version>.*:\1:p' <<<"$published_feed" | head -1)"
+  if [[ -n "$published_build" ]] && ((bundle_version <= published_build)); then
+    echo "CURRENT_PROJECT_VERSION ($bundle_version) must be above the published build ($published_build)" >&2
+    exit 1
+  fi
+fi
+
 # Prints: sparkle:edSignature="..." length="..."
 enclosure_signature="$("${SPARKLE_BIN:?}/sign_update" --ed-key-file "${SPARKLE_ED_KEY_FILE:?}" "$DMG")"
 
