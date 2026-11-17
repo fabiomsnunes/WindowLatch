@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BD514AC02FAF78C800E3D6C5 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = BD514A8B2FAF779400E3D6C6 /* KeyboardShortcuts */; };
+		BD514AC12FAF78C800E3D6C5 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = BD514AC32FAF78C800E3D6C5 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,6 +58,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD514AC02FAF78C800E3D6C5 /* KeyboardShortcuts in Frameworks */,
+				BD514AC12FAF78C800E3D6C5 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			name = WindowLatch;
 			packageProductDependencies = (
 				BD514A8B2FAF779400E3D6C6 /* KeyboardShortcuts */,
+				BD514AC32FAF78C800E3D6C5 /* Sparkle */,
 			);
 			productName = WindowLatch;
 			productReference = BD35746F2FAD145A00AFC5DB /* WindowLatch.app */;
@@ -203,6 +206,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				BD514A8A2FAF779400E3D6C5 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+				BD514AC22FAF78C800E3D6C5 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BD3574702FAD145A00AFC5DB /* Products */;
@@ -409,6 +413,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Support/WindowLatch-Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "WindowLatch uses Accessibility to read window positions and move/resize windows when you trigger a snap or shortcut.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -441,6 +446,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Support/WindowLatch-Info.plist;
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSAccessibilityUsageDescription = "WindowLatch uses Accessibility to read window positions and move/resize windows when you trigger a snap or shortcut.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -587,6 +593,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		BD514AC22FAF78C800E3D6C5 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.10.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -594,6 +608,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BD514A8A2FAF779400E3D6C5 /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
+		};
+		BD514AC32FAF78C800E3D6C5 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD514AC22FAF78C800E3D6C5 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -5,7 +5,7 @@
 [![Platform: macOS 26+](https://img.shields.io/badge/platform-macOS%2026%2B-lightgrey.svg)](#install)
 [![Built with Swift 6](https://img.shields.io/badge/swift-6-orange.svg)](https://swift.org)
 
-**A fast, focused window manager for macOS.** [**⬇ Download the latest `.dmg`**](https://github.com/fabiomsnunes/WindowLatch/releases/latest) — ~400 KB, no installer, no account.
+**A fast, focused window manager for macOS.** [**⬇ Download the latest `.dmg`**](https://github.com/fabiomsnunes/WindowLatch/releases/latest) — ~2 MB, no installer, no account.
 
 Cycle the focused window through ⅔ → ½ → ⅓ zones with one keyboard shortcut per direction. Combine directions for quadrants. Jump across monitors when you run out of room. Inspired by Microsoft PowerToys' **FancyZones**.
 
@@ -15,7 +15,8 @@ Cycle the focused window through ⅔ → ½ → ⅓ zones with one keyboard shor
 - **It works across monitors.** When the cycle exhausts, the window leaps to the next display. Press the opposite arrow within 1.5 s to snap straight back.
 - **It does directional combos.** `⌃⌥ ←` then `⌃⌥ ↑` = top-left quadrant. No extra keys to memorise.
 - **It respects each monitor.** Configure halves / thirds / quarters independently per display — your ultrawide and your 4K don't have to agree.
-- **It's a 400 KB download.** Native Swift + AppKit. No Electron, no background daemons, no analytics.
+- **It's a 2 MB download.** Native Swift + AppKit. No Electron, no background daemons, no analytics.
+- **It updates itself.** New versions install from the menu bar, and the Accessibility permission carries over.
 - **It's MIT-licensed and open source.** Read the code. Fork it.
 
 ![WindowLatch — four windows snapped into a clean grid on a macOS desktop](assets/hero.jpg)
@@ -41,6 +42,7 @@ The modifier is reconfigurable in Settings (Ctrl+Option, Ctrl+Cmd, Cmd+Option, o
 - **Per-monitor zone configuration:** enable/disable halves, thirds, and quarters independently per display.
 - **Configurable** gap, cycle reset delay, and modifier key.
 - **Menu-bar app** — no Dock clutter.
+- **Auto-update:** checks GitHub Releases for new versions (after asking you once), or on demand with **Check for Updates…** in the menu.
 
 ## Install
 
@@ -88,7 +90,7 @@ On first launch the onboarding screen explains this and links to the right pane:
 
 **System Settings → Privacy & Security → Accessibility → toggle WindowLatch on.**
 
-You grant it once. Every release is signed with the same certificate, so macOS keeps the permission when you update. (Releases up to 1.0.2 were ad-hoc signed and asked again after each update; the first update from 1.0.2 asks one last time.)
+You grant it once. Every release is signed with the same certificate, so macOS keeps the permission when you update. **Updating from 1.0.2 or earlier:** those releases were ad-hoc signed, and macOS keeps their old Accessibility entry, which no longer matches the new signature. The toggle shows as on but shortcuts do nothing. Once, after updating, open **Settings → Reset Accessibility Permission** (or remove WindowLatch from the Accessibility list with **−** and add it again), then grant it. From then on it carries over.
 
 The app detects the change automatically — no restart needed.
 
@@ -109,6 +111,7 @@ Have an idea? [Open an issue](https://github.com/fabiomsnunes/WindowLatch/issues
 - **Swift 6** + **SwiftUI** (Settings) + **AppKit** (menu bar, windows)
 - **Accessibility API** for window manipulation
 - [**KeyboardShortcuts**](https://github.com/sindresorhus/KeyboardShortcuts) by Sindre Sorhus for global hotkeys
+- [**Sparkle**](https://sparkle-project.org) for updates, verified with an EdDSA signature on every release
 - Pure `CycleEngine` state machine — fully unit-tested, no AX or `Date.now` dependency
 - `ScreenAdjacency` is a pure helper — also unit-tested
 - Hybrid persistence: UserDefaults (gap, delay, modifier) + JSON (per-monitor zone groups)
@@ -124,13 +127,15 @@ xcodebuild test -scheme WindowLatch -destination 'platform=macOS' -only-testing:
 
 CI runs SwiftFormat lint on every PR. Tests must pass locally before cutting a release tag.
 
+To cut a release, bump both `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` (Sparkle compares the build number), then push a `vX.Y.Z` tag matching `MARKETING_VERSION`. The release workflow signs the app, builds the `.dmg` and publishes it with its `appcast.xml`.
+
 ## FAQ
 
 **How is this different from Rectangle, Magnet, or Moom?**
 The cycle behaviour. WindowLatch presses the same arrow repeatedly to step through `⅔ → ½ → ⅓` — Rectangle and Magnet require separate shortcuts for each size, Moom needs you to open a palette. WindowLatch also auto-jumps to the next monitor when the cycle exhausts, which none of them do natively.
 
 **Does it phone home?**
-No. There is no network code in the app.
+Only to look for updates. On second launch it asks whether to check automatically; if you say yes, it fetches `appcast.xml` from this repo's GitHub Releases about once a day. Sparkle sends nothing else: no analytics, no system profile. Say no, and it only checks when you pick **Check for Updates…**.
 
 **Will it work on macOS 15 or earlier?**
 Not in this release. The deployment target is macOS 26 (Tahoe). Backporting is possible but not planned.
@@ -144,4 +149,4 @@ Apple Developer notarisation costs €99/year for a personal-use, free app. A se
 
 ## Acknowledgements
 
-Inspired by Microsoft PowerToys **FancyZones**. Built on top of Sindre Sorhus's **KeyboardShortcuts**.
+Inspired by Microsoft PowerToys **FancyZones**. Built on top of Sindre Sorhus's **KeyboardShortcuts** and **Sparkle**.

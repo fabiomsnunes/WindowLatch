@@ -65,9 +65,30 @@ jobs:
             "build/WindowLatch-${GITHUB_REF_NAME}.dmg" \
             build/export/WindowLatch.app
 
+      - name: Create Sparkle appcast
+        env:
+          SPARKLE_VERSION: 2.10.1
+          SPARKLE_SHA256: 1a856d2a9edb8e628de88121d7be04cf0e2167f8641650b78fca00b14244cf27
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          sparkle="$RUNNER_TEMP/sparkle"
+          mkdir -p "$sparkle"
+          curl -fsSL -o "$sparkle/sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz"
+          echo "$SPARKLE_SHA256  $sparkle/sparkle.tar.xz" | shasum -a 256 -c -
+          tar -xf "$sparkle/sparkle.tar.xz" -C "$sparkle"
+          key_file="$RUNNER_TEMP/sparkle_ed_key"
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" > "$key_file"
+          SPARKLE_BIN="$sparkle/bin" SPARKLE_ED_KEY_FILE="$key_file" scripts/make-appcast.sh \
+            "$GITHUB_REF_NAME" build/export/WindowLatch.app \
+            "build/WindowLatch-${GITHUB_REF_NAME}.dmg" build/appcast.xml
+          rm "$key_file"
+
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: build/WindowLatch-*.dmg
+          files: |
+            build/WindowLatch-*.dmg
+            build/appcast.xml
           draft: false
           generate_release_notes: true

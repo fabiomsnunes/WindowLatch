@@ -15,18 +15,24 @@ readonly CERT_SHA1="6677765CD4BD5C85108B1B925E74FA3039E12A27"
 readonly APP="${1:?usage: sign-app.sh <path/to/WindowLatch.app>}"
 readonly KEYCHAIN="${SIGNING_KEYCHAIN:?SIGNING_KEYCHAIN must point to the keychain holding the certificate}"
 
+# No hardened runtime (--options runtime): it turns on library validation, which only
+# loads frameworks signed with the app's Apple Team ID. A self-signed certificate has no
+# Team ID, so dyld refuses the embedded Sparkle.framework and the app dies at launch.
+# The hardened runtime is only required for notarisation, which these builds skip.
 sign() {
-  codesign --force --options runtime --timestamp=none \
+  codesign --force --timestamp=none \
     --preserve-metadata=entitlements \
     --keychain "$KEYCHAIN" --sign "$CERT_SHA1" "$1"
 }
 
 # Nested code first (find -depth lists children before their parent): a bundle's
-# signature covers what it contains, so it has to be signed last.
+# signature covers what it contains, so it has to be signed last. Autoupdate is the
+# Sparkle helper executable, which has no bundle extension to match on.
 while IFS= read -r nested; do
   sign "$nested"
 done < <(
-  find "$APP/Contents" -depth \( -name '*.framework' -o -name '*.xpc' -o -name '*.app' -o -name '*.dylib' \) -print
+  find "$APP/Contents" -depth \( -name '*.framework' -o -name '*.xpc' -o -name '*.app' -o -name '*.dylib' \
+    -o \( -name Autoupdate -type f \) \) -print
 )
 sign "$APP"
 
