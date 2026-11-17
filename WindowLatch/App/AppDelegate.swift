@@ -1,5 +1,6 @@
 import AppKit
 import KeyboardShortcuts
+import Sparkle
 import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -7,6 +8,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingController: OnboardingWindowController?
     private var settingsController: SettingsWindowController?
     private let cycleCoordinator = CycleCoordinator(settings: .shared, zones: .shared)
+    /// Reads the feed and public key from Info.plist (SUFeedURL, SUPublicEDKey).
+    private let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
     let permissions = PermissionsManager()
 
     func applicationDidFinishLaunching(_: Notification) {
@@ -76,6 +83,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
         settingsItem.target = self
         menu.addItem(settingsItem)
+
+        let updatesItem = NSMenuItem(
+            title: "Check for Updates…",
+            action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)),
+            keyEquivalent: ""
+        )
+        updatesItem.target = updaterController
+        menu.addItem(updatesItem)
 
         menu.addItem(.separator())
 

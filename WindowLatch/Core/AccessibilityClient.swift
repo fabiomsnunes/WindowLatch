@@ -1,5 +1,8 @@
 import AppKit
 import ApplicationServices
+import OSLog
+
+private let log = Logger(subsystem: "com.fabiomsnunes.WindowLatch", category: "accessibility")
 
 /// Thin wrapper over the AX C API. **All AX I/O lives here** — no other file should call AX* directly.
 ///
@@ -14,7 +17,9 @@ enum AccessibilityClient {
     /// registers the app in the Accessibility pane and is correct on the happy
     /// path — but fall back to a live AX read, which reflects the real grant.
     static func isTrusted() -> Bool {
-        if AXIsProcessTrusted() { return true }
+        if AXIsProcessTrusted() {
+            return true
+        }
 
         let systemWide = AXUIElementCreateSystemWide()
         var ref: CFTypeRef?
@@ -90,7 +95,10 @@ enum AccessibilityClient {
     private static func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
         var ref: CFTypeRef?
         let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &ref)
-        guard result == .success, let ref else { return nil }
+        guard result == .success, let ref else {
+            log.debug("\(attribute, privacy: .public) unavailable: AXError \(result.rawValue, privacy: .public)")
+            return nil
+        }
         return (ref as! AXUIElement)
     }
 
@@ -99,6 +107,7 @@ enum AccessibilityClient {
         var ref: CFTypeRef?
         let result = AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &ref)
         guard result == .success, let windows = ref as? [AXUIElement], !windows.isEmpty else {
+            log.debug("No windows listed: AXError \(result.rawValue, privacy: .public)")
             return nil
         }
         let main = windows.first { window in

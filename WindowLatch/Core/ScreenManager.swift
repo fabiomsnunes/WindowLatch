@@ -82,7 +82,9 @@ final class ScreenManager {
     func screen(forFocusedWindow window: AXUIElement) -> ScreenInfo? {
         if let frame = AccessibilityClient.frame(of: window) {
             let mid = CGPoint(x: frame.midX, y: frame.midY) // AX coords
-            if let s = screen(containingAXPoint: mid) { return s }
+            if let s = screen(containingAXPoint: mid) {
+                return s
+            }
         }
         return screenUnderCursor() ?? primary
     }
