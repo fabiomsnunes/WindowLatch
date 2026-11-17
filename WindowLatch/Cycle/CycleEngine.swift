@@ -133,24 +133,22 @@ nonisolated struct CycleEngine {
                 let next = directionSequence[idx + 1]
                 let newState = CycleState(lastDirection: input.direction, lastZone: next, lastTimestamp: input.now)
                 return (.apply(next, on: .current), newState)
+            } else if input.hasNeighbour {
+                let entry = crossMonitorEntry(input.direction)
+                let newState = CycleState(
+                    lastDirection: input.direction,
+                    lastZone: entry,
+                    lastTimestamp: input.now,
+                    lastJumpDirection: input.direction
+                )
+                return (.apply(entry, on: .neighbour), newState)
             } else {
-                if input.hasNeighbour {
-                    let entry = crossMonitorEntry(input.direction)
-                    let newState = CycleState(
-                        lastDirection: input.direction,
-                        lastZone: entry,
-                        lastTimestamp: input.now,
-                        lastJumpDirection: input.direction
-                    )
-                    return (.apply(entry, on: .neighbour), newState)
-                } else {
-                    let newState = CycleState(
-                        lastDirection: input.direction,
-                        lastZone: input.state.lastZone,
-                        lastTimestamp: input.now
-                    )
-                    return (.noOp, newState)
-                }
+                let newState = CycleState(
+                    lastDirection: input.direction,
+                    lastZone: input.state.lastZone,
+                    lastTimestamp: input.now
+                )
+                return (.noOp, newState)
             }
         }
 

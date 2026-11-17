@@ -72,7 +72,9 @@ final class ZoneStore {
             let decoded = try JSONDecoder().decode(Persisted.self, from: data)
             var out: [CGDirectDisplayID: Set<ZoneGroup>] = [:]
             for (k, v) in decoded.groups {
-                if let id = UInt32(k) { out[id] = Set(v) }
+                if let id = UInt32(k) {
+                    out[id] = Set(v)
+                }
             }
             return out
         } catch {

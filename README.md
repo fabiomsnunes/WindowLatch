@@ -48,7 +48,7 @@ The modifier is reconfigurable in Settings (Ctrl+Option, Ctrl+Cmd, Cmd+Option, o
 
 1. Download `WindowLatch-vX.Y.Z.dmg` from [Releases](https://github.com/fabiomsnunes/WindowLatch/releases/latest).
 2. Open the `.dmg` and drag **WindowLatch** to `/Applications`.
-3. **First launch.** The build is ad-hoc signed (not notarised), so Gatekeeper blocks it. On macOS 15 and later the old right-click → Open trick no longer works — use the steps below:
+3. **First launch.** The build is signed with WindowLatch's own certificate but not notarised by Apple, so Gatekeeper blocks it. On macOS 15 and later the old right-click → Open trick no longer works — use the steps below:
    1. Double-click **WindowLatch**. macOS shows _"Apple could not verify 'WindowLatch' is free of malware…"_ — click **Done** (the app does not open yet).
    2. Open **System Settings → Privacy & Security** and scroll down. You'll see _"WindowLatch was blocked to protect your Mac."_ — click **Open Anyway**.
    3. Authenticate with Touch ID or your password, then click **Open Anyway** in the final confirmation dialog.
@@ -60,13 +60,13 @@ WindowLatch is a **menu-bar app** — once running, look for its icon in the men
 
 ### Verify the download (optional)
 
-The release is built by [GitHub Actions](.github/workflows/release.yml) straight from a tagged commit — no manual upload. To confirm the `.app` is the unmodified ad-hoc build:
+The release is built by [GitHub Actions](.github/workflows/release.yml) straight from a tagged commit — no manual upload. To confirm the `.app` is the unmodified release build:
 
 ```bash
 codesign --verify --deep --strict --verbose=2 /Applications/WindowLatch.app
 # expected: "valid on disk" and "satisfies its Designated Requirement"
-codesign -dvv /Applications/WindowLatch.app 2>&1 | grep -E 'Identifier|Signature'
-# expected: Identifier=com.fabiomsnunes.WindowLatch, Signature=adhoc
+codesign -d -r- /Applications/WindowLatch.app 2>&1 | grep designated
+# expected: certificate leaf = H"6677765cd4bd5c85108b1b925e74fa3039e12a27"
 ```
 
 ### Build from source
@@ -87,6 +87,8 @@ WindowLatch needs **Accessibility** to move and resize windows of other apps —
 On first launch the onboarding screen explains this and links to the right pane:
 
 **System Settings → Privacy & Security → Accessibility → toggle WindowLatch on.**
+
+You grant it once. Every release is signed with the same certificate, so macOS keeps the permission when you update. (Releases up to 1.0.2 were ad-hoc signed and asked again after each update; the first update from 1.0.2 asks one last time.)
 
 The app detects the change automatically — no restart needed.
 
@@ -133,8 +135,8 @@ No. There is no network code in the app.
 **Will it work on macOS 15 or earlier?**
 Not in this release. The deployment target is macOS 26 (Tahoe). Backporting is possible but not planned.
 
-**Why ad-hoc signed instead of notarised?**
-Apple Developer notarisation costs €99/year for a personal-use, free app. Ad-hoc signing means one extra Gatekeeper click on first launch, then it's invisible.
+**Why self-signed instead of notarised?**
+Apple Developer notarisation costs €99/year for a personal-use, free app. A self-signed certificate means one extra Gatekeeper click on first launch, then it's invisible, and the Accessibility permission carries over between updates.
 
 ## License
 
