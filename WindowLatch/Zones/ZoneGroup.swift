@@ -60,9 +60,15 @@ nonisolated enum ZoneGroup: String, CaseIterable, Codable, Identifiable {
         }
 
         var seq: [Zone] = []
-        if hasThirds { seq.append(twoThirds) }
-        if hasHalves { seq.append(half) }
-        if hasThirds { seq.append(third) }
+        if hasThirds {
+            seq.append(twoThirds)
+        }
+        if hasHalves {
+            seq.append(half)
+        }
+        if hasThirds {
+            seq.append(third)
+        }
         return seq
     }
 }

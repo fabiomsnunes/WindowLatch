@@ -14,7 +14,9 @@ enum AccessibilityClient {
     /// registers the app in the Accessibility pane and is correct on the happy
     /// path — but fall back to a live AX read, which reflects the real grant.
     static func isTrusted() -> Bool {
-        if AXIsProcessTrusted() { return true }
+        if AXIsProcessTrusted() {
+            return true
+        }
 
         let systemWide = AXUIElementCreateSystemWide()
         var ref: CFTypeRef?
