@@ -90,7 +90,7 @@ On first launch the onboarding screen explains this and links to the right pane:
 
 **System Settings → Privacy & Security → Accessibility → toggle WindowLatch on.**
 
-You grant it once. Every release is signed with the same certificate, so macOS keeps the permission when you update. (Releases up to 1.0.2 were ad-hoc signed and asked again after each update; the first update from 1.0.2 asks one last time.)
+You grant it once. Every release is signed with the same certificate, so macOS keeps the permission when you update. **Updating from 1.0.2 or earlier:** those releases were ad-hoc signed, and macOS keeps their old Accessibility entry, which no longer matches the new signature. The toggle shows as on but shortcuts do nothing. Once, after updating, open **Settings → Reset Accessibility Permission** (or remove WindowLatch from the Accessibility list with **−** and add it again), then grant it. From then on it carries over.
 
 The app detects the change automatically — no restart needed.
 
